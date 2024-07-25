@@ -1,0 +1,52 @@
+.hidden {
+    display: none;
+  }
+
+  .container {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table th, .table td {
+    white-space: nowrap;
+    padding: 4px 8px;
+    text-align: center;
+  }
+
+  .thead-dark th {
+    background-color: #343a40;
+    color: white;
+  }
+
+  .text-truncate {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Animações para transição suave */
+  #main-nav {
+    transition: all 0.3s ease-in-out;
+  }
+
+  #main-nav.hidden {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  /* Ajuste para garantir que a tabela ocupe todo o espaço */
+  .px-content {
+    transition: all 0.3s ease-in-out;
+  }
+
+  .table th.actions, .table td.actions {
+    width: 150px;
+  }
+  #main-nav ion-icon {
+    font-size: 20px; /* Aumente o valor para ajustar o tamanho do ícone */
+  }
