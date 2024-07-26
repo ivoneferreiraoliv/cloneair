@@ -27,6 +27,8 @@ class Admin extends CI_Controller {
 
     public function index() {
         $this->check_login();
+
+        
         $data['accommodations'] = $this->Accommodation_model->get_accommodations();
         $data['userlogado'] = $this->session->userdata('userlogado');
 

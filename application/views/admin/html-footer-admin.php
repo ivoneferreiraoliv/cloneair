@@ -37,6 +37,7 @@
   <script src="<?php echo base_url('public/admin/pixeladmin/js/bootstrap.min.js'); ?>"></script>
   <script src="<?php echo base_url('public/admin/pixeladmin/pace/pace.min.js'); ?>"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="<?php echo base_url('public/jquery_validation/dist/jquery.validate.min.js'); ?>"></script>
   <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
 

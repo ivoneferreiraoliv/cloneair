@@ -20,7 +20,7 @@
       <a href="admin/accommodations"><ion-icon name="bed-outline" role="img" class="md hydrated" aria-label="bed outline"></ion-icon> Acomodações</a>
       </li>
       <li class="px-nav-item">
-        <a href="#"><ion-icon name="people-outline" role="img" class="md hydrated" aria-label="people outline"></ion-icon> Usuários</a>
+        <a href="admin/usuarios"><ion-icon name="people-outline" role="img" class="md hydrated" aria-label="people outline"></ion-icon> Usuários</a>
       </li>
       <li class="px-nav-item ">
         <a href="#"><ion-icon name="calendar-outline" role="img" class="md hydrated" aria-label="calendar outline"></ion-icon> Reservas</a>
@@ -59,12 +59,12 @@
       </div>
       <div class="panel-body">
         <div class="table-responsive">
-          <table class="table table-striped"id="datatables">
+          <table class="table table-info"id="datatables">
             <thead>
               <tr>
                 <th>#</th>
                 <th>Nome</th>
-                <th>Descrição</th>
+                
                 <th>Localização</th>
                 <th>Preço por Noite</th>
                 <th>Quartos</th>
@@ -80,7 +80,7 @@
                     <tr>
                       <td><?php echo $accommodation->id; ?></td>
                       <td><?php echo $accommodation->name; ?></td>
-                      <td><?php echo $accommodation->description; ?></td>
+                      
                       <td><?php echo $accommodation->location; ?></td>
                       <td>R$ <?php echo number_format($accommodation->price_per_night, 2, ',', '.'); ?></td>
                       <td><?php echo $accommodation->num_rooms; ?></td>

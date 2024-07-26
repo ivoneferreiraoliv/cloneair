@@ -42,6 +42,8 @@
     var baseUrl = "<?php echo base_url(); ?>";
   </script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
   <script src="<?php echo base_url('public/admin/pixeladmin/js/script.js')?>"></script>
+  <script src="<?php echo base_url('public/jquery_validation/dist/jquery.validate.min.js'); ?>"></script>
  
 </head>

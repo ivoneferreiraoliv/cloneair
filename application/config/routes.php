@@ -58,6 +58,13 @@ $route['admin/accommodations'] = 'admin/admin_accommodation';
 $route['admin/accommodations/adicionar'] = 'admin/create_accommodation';
 $route['admin/accommodations/editar/(:num)'] = 'admin/edit_accommodation/$1';
 $route['admin/accommodations/excluir'] = 'admin/delete_accommodation_ajax';
+
+$route['admin/usuarios'] = 'users/listar_admin';
+$route['admin/usuarios/adicionar'] = 'users/adicionar';
+$route['admin/usuarios/editar/(:num)'] = 'users/editar/$1';
+
+$route['admin/usuarios/excluir'] = 'users/excluir';
+
 $route['admin/logout'] = 'admin/logout';
 
 
