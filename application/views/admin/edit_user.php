@@ -136,101 +136,101 @@
   </div>
 
   <script>
-    $(document).ready(function() {
-      // Adicionar validação jQuery Validation
-      $("#editUserForm").validate({
-        rules: {
-          username: {
-            required: true,
-            minlength: 3
-          },
-          email: {
-            required: true,
-            email: true
-          },
-          first_name: {
-            required: true
-          },
-          last_name: {
-            required: true
-          },
-          user_type: {
-            required: true
-          }
+  $(document).ready(function() {
+    // Adicionar validação jQuery Validation
+    $("#editUserForm").validate({
+      rules: {
+        username: {
+          required: true,
+          minlength: 3
         },
-        messages: {
-          username: {
-            required: "Por favor, insira um nome de usuário",
-            minlength: "O nome de usuário deve ter pelo menos 3 caracteres"
-          },
-          email: {
-            required: "Por favor, insira um email",
-            email: "Por favor, insira um email válido"
-          },
-          first_name: {
-            required: "Por favor, insira o primeiro nome"
-          },
-          last_name: {
-            required: "Por favor, insira o sobrenome"
-          },
-          user_type: {
-            required: "Por favor, selecione um tipo de usuário"
-          }
+        email: {
+          required: true,
+          email: true
         },
-        errorElement: 'div',
-        errorPlacement: function(error, element) {
-          error.addClass('invalid-feedback');
-          error.insertAfter(element);
+        first_name: {
+          required: true
         },
-        highlight: function(element, errorClass, validClass) {
-          $(element).addClass('is-invalid').removeClass('is-valid');
+        last_name: {
+          required: true
         },
-        unhighlight: function(element, errorClass, validClass) {
-          $(element).removeClass('is-invalid').addClass('is-valid');
+        user_type: {
+          required: true
         }
-      });
-
-      // Submissão do formulário via AJAX com confirmação SweetAlert
-      $('#editUserForm').on('submit', function(event) {
-        event.preventDefault();
-        if ($("#editUserForm").valid()) { 
-          Swal.fire({
-            title: "Você tem certeza?",
-            text: "Deseja salvar as alterações?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sim, salvar!"
-          }).then((result) => {
-            if (result.isConfirmed) {
-              var formData = $(this).serialize();
-              $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: formData,
-                dataType: 'json',
-                success: function(response) {
-                  if (response.status === 'success') {
-                    Swal.fire({
-                      title: "Salvo!",
-                      text: response.message,
-                      icon: "success"
-                    });
-                    setTimeout(function() {
-                      window.location.href = '<?php echo base_url('admin/usuarios'); ?>';
-                    }, 2000);
-                  } else {
-                    toastr.error('Erro: ' + response.message, 'Erro');
-                  }
-                },
-                error: function(xhr, status, error) {
-                  toastr.error('Erro ao comunicar com o servidor. Tente novamente mais tarde.', 'Erro');
-                }
-              });
-            }
-          });
+      },
+      messages: {
+        username: {
+          required: "Por favor, insira um nome de usuário",
+          minlength: "O nome de usuário deve ter pelo menos 3 caracteres"
+        },
+        email: {
+          required: "Por favor, insira um email",
+          email: "Por favor, insira um email válido"
+        },
+        first_name: {
+          required: "Por favor, insira o primeiro nome"
+        },
+        last_name: {
+          required: "Por favor, insira o sobrenome"
+        },
+        user_type: {
+          required: "Por favor, selecione um tipo de usuário"
         }
-      });
+      },
+      errorElement: 'div',
+      errorPlacement: function(error, element) {
+        error.addClass('invalid-feedback');
+        error.insertAfter(element);
+      },
+      highlight: function(element, errorClass, validClass) {
+        $(element).addClass('is-invalid').removeClass('is-valid');
+      },
+      unhighlight: function(element, errorClass, validClass) {
+        $(element).removeClass('is-invalid').addClass('is-valid');
+      }
     });
+
+    // Submissão do formulário via AJAX com confirmação SweetAlert
+    $('#editUserForm').on('submit', function(event) {
+      event.preventDefault();
+      if ($("#editUserForm").valid()) {
+        Swal.fire({
+          title: "Você tem certeza?",
+          text: "Deseja salvar as alterações?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sim, salvar!"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            var formData = $(this).serialize();
+            $.ajax({
+              type: 'POST',
+              url: $(this).attr('action'),
+              data: formData,
+              dataType: 'json',
+              success: function(response) {
+                if (response.status === 'success') {
+                  Swal.fire({
+                    title: "Salvo!",
+                    text: response.message,
+                    icon: "success"
+                  });
+                  setTimeout(function() {
+                    window.location.href = '<?php echo base_url('admin/usuarios'); ?>';
+                  }, 2000);
+                } else {
+                  toastr.error('Erro: ' + response.message, 'Erro');
+                }
+              },
+              error: function(xhr, status, error) {
+                toastr.error('Erro ao comunicar com o servidor. Tente novamente mais tarde.', 'Erro');
+              }
+            });
+          }
+        });
+      }
+    });
+  });
 </script>

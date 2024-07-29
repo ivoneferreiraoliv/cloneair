@@ -122,7 +122,7 @@ class Users extends CI_Controller {
         exit;
     }
 
-    public function editar($id) {
+	public function editar($id) {
 		$this->check_login();
 	
 		if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -141,27 +141,26 @@ class Users extends CI_Controller {
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			// Carrega o modelo de usuário
 			$this->load->model('User_model');
-			
+	
 			// Obtém os dados do formulário
 			$data = array(
 				'username' => $this->input->post('username'),
 				'email' => $this->input->post('email'),
 				// Adicione outros campos conforme necessário
 			);
-			
+	
 			// Atualiza os dados do usuário
 			$update = $this->User_model->update_user($id, $data);
-			
+	
 			// Verifica se a atualização foi bem-sucedida
 			if ($update) {
-				// Redireciona com mensagem de sucesso
-				$this->session->set_flashdata('success', 'Usuário atualizado com sucesso.');
-				redirect('admin/usuarios');
+				// Resposta de sucesso
+				echo json_encode(['status' => 'success', 'message' => 'Usuário atualizado com sucesso.']);
 			} else {
-				// Define mensagem de erro
-				$this->session->set_flashdata('error', 'Erro ao atualizar o usuário.');
-				redirect('admin/usuarios/editar/' . $id);
+				// Resposta de erro
+				echo json_encode(['status' => 'error', 'message' => 'Erro ao atualizar o usuário.']);
 			}
+			return;
 		}
 	}
 
