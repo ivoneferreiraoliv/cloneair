@@ -1,11 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 /**
- * @property CI_DB_query_builder $db
+ * @property CI_DB_mssql_driver $db
  * @property CI_Session $session
  * @property CI_Form_validation $form_validation
  * @property CI_Input $input
+ * @property CI_Upload $upload
  * @property Accommodation_model $Accommodation_model
+ * @property Category_model $Category_model
  */
 class Admin extends CI_Controller {
 
@@ -14,9 +16,11 @@ class Admin extends CI_Controller {
         $this->load->database();
         $this->load->library('session');
         $this->load->library('form_validation');
+        $this->load->library('upload'); 
         $this->load->helper('url');
         $this->load->helper('form');
         $this->load->model('Accommodation_model');
+        $this->load->model('Category_model');
     }
 
     private function check_login() {
@@ -37,6 +41,16 @@ class Admin extends CI_Controller {
         $this->load->view('admin/html-footer-admin');
     }
 
+    public function admin_accommodation() {
+        $this->check_login();
+
+        $data['accommodations'] = $this->Accommodation_model->get_accommodations();
+        $data['userlogado'] = $this->session->userdata('userlogado');
+
+        $this->load->view('admin/html-head-admin');
+        $this->load->view('admin/admin-accommodation', $data); 
+        $this->load->view('admin/html-footer-admin');
+    }
     public function pag_login() {
         $this->load->view('admin/html-head-admin');
         $this->load->view('admin/login-admin');
@@ -78,61 +92,99 @@ class Admin extends CI_Controller {
     }
 //
 
-    public function admin_accommodation(){
-        $this->check_login();
-        
-        $data['accommodations'] = $this->Accommodation_model->get_accommodations();
+public function create_accommodation() {
+    $this->check_login();
+
+    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        $data['categories'] = $this->Category_model->get_categories();
         $this->load->view('admin/html-head-admin');
-        $this->load->view('admin/admin-accommodation', $data);
+        $this->load->view('admin/add_accommodation', $data);
         $this->load->view('admin/html-footer-admin');
+        return;
     }
 
-    public function create_accommodation() {
-        $this->check_login();
-    
-        // Se a requisição for GET, exiba a página HTML
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            $this->load->view('admin/html-head-admin');
-            $this->load->view('admin/add_accommodation');
-            $this->load->view('admin/html-footer-admin');
-            return;
-        }
-    
-        // Se a requisição for POST, processe os dados
-        // Configurar as regras de validação do formulário
-        $this->form_validation->set_rules('name', 'Nome', 'required');
-        $this->form_validation->set_rules('description', 'Descrição', 'required');
-        $this->form_validation->set_rules('location', 'Localização', 'required');
-        $this->form_validation->set_rules('price_per_night', 'Preço por Noite', 'required');
-        $this->form_validation->set_rules('num_rooms', 'Número de Quartos', 'required');
-        $this->form_validation->set_rules('num_bathrooms', 'Número de Banheiros', 'required');
-        $this->form_validation->set_rules('max_guests', 'Máximo de Hóspedes', 'required');
-    
-        // Verificar se a validação falhou
-        if ($this->form_validation->run() == FALSE) {
-            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-            return;
-        }
-    
-        // Coletar os dados do formulário
-        $data = array(
-            'name' => $this->input->post('name'),
-            'description' => $this->input->post('description'),
-            'location' => $this->input->post('location'),
-            'price_per_night' => $this->input->post('price_per_night'),
-            'num_rooms' => $this->input->post('num_rooms'),
-            'num_bathrooms' => $this->input->post('num_bathrooms'),
-            'max_guests' => $this->input->post('max_guests'),
-            'created_at' => date('Y-m-d H:i:s')
-        );
-    
-        // Inserir os dados no banco de dados
-        if ($this->Accommodation_model->create_accommodation($data)) {
-            echo json_encode(['status' => 'success', 'message' => 'Adicionado com sucesso!']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Erro ao adicionar acomodação.']);
-        }
+    $this->form_validation->set_rules('name', 'Nome', 'required');
+    $this->form_validation->set_rules('description', 'Descrição', 'required');
+    $this->form_validation->set_rules('location', 'Localização', 'required');
+    $this->form_validation->set_rules('price_per_night', 'Preço por Noite', 'required');
+    $this->form_validation->set_rules('num_rooms', 'Número de Quartos', 'required');
+    $this->form_validation->set_rules('num_bathrooms', 'Número de Banheiros', 'required');
+    $this->form_validation->set_rules('max_guests', 'Máximo de Hóspedes', 'required');
+
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+        return;
     }
+
+    $data = array(
+        'name' => $this->input->post('name'),
+        'description' => $this->input->post('description'),
+        'location' => $this->input->post('location'),
+        'price_per_night' => $this->input->post('price_per_night'),
+        'num_rooms' => $this->input->post('num_rooms'),
+        'num_bathrooms' => $this->input->post('num_bathrooms'),
+        'max_guests' => $this->input->post('max_guests'),
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    );
+
+    if ($this->Accommodation_model->create_accommodation($data)) {
+        $accommodation_id = $this->db->insert_id();
+        $categories = $this->input->post('categories');
+
+        if (!empty($categories)) {
+            foreach ($categories as $category_id) {
+                $this->db->insert('accommodations_categories', array(
+                    'accommodation_id' => $accommodation_id,
+                    'category_id' => $category_id
+                ));
+            }
+        }
+
+        // Processar o upload das fotos
+        $this->load->library('upload');
+        $files = $_FILES;
+        $count = count($_FILES['photos']['name']);
+        for($i = 0; $i < $count; $i++) {
+            $_FILES['photo']['name'] = $files['photos']['name'][$i];
+            $_FILES['photo']['type'] = $files['photos']['type'][$i];
+            $_FILES['photo']['tmp_name'] = $files['photos']['tmp_name'][$i];
+            $_FILES['photo']['error'] = $files['photos']['error'][$i];
+            $_FILES['photo']['size'] = $files['photos']['size'][$i];
+
+            $this->upload->initialize($this->set_upload_options());
+
+            if ($this->upload->do_upload('photo')) {
+                $upload_data = $this->upload->data();
+                $file_name = $upload_data['file_name'];
+
+                $this->db->insert('accommodation_photos', array(
+                    'accommodation_id' => $accommodation_id,
+                    'photo' => $file_name
+                ));
+            } else {
+                $error = $this->upload->display_errors();
+                log_message('error', 'Upload error: ' . $error);
+                echo json_encode(['status' => 'error', 'message' => $error]);
+                return;
+            }
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Adicionado com sucesso!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Erro ao adicionar acomodação.']);
+    }
+}
+
+private function set_upload_options() {   
+    $config = array();
+    $config['upload_path'] = './uploads/';
+    $config['allowed_types'] = 'gif|jpg|png';
+    $config['max_size'] = '2048'; // 2MB
+    $config['overwrite'] = FALSE;
+
+    return $config;
+}
     
     public function edit_accommodation($id) {
         $this->check_login();
