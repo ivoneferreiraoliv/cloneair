@@ -19,6 +19,15 @@ class Accommodation_model extends CI_Model {
         return $query->row();
     }
 
+    public function get_accommodations_with_photos() {
+        $this->db->select('accommodations.*, accommodation_photos.photo');
+        $this->db->from('accommodations');
+        $this->db->join('accommodation_photos', 'accommodations.id = accommodation_photos.accommodation_id', 'left');
+        $this->db->group_by('accommodations.id'); 
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function create_accommodation($data) {
         $insert = $this->db->insert('accommodations', $data);
         if ($insert) {

@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @property CI_Upload $upload
  * @property Accommodation_model $Accommodation_model
  * @property Category_model $Category_model
+ * @property Photo_model $Photo_model
  */
 class Admin extends CI_Controller {
 
@@ -21,6 +22,7 @@ class Admin extends CI_Controller {
         $this->load->helper('form');
         $this->load->model('Accommodation_model');
         $this->load->model('Category_model');
+        $this->load->model('Photo_model');
     }
 
     private function check_login() {
@@ -186,53 +188,96 @@ private function set_upload_options() {
     return $config;
 }
     
-    public function edit_accommodation($id) {
-        $this->check_login();
-    
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
-            if (!$accommodation) {
-                echo json_encode(['status' => 'error', 'message' => 'Acomodação não encontrada.']);
-                return;
-            }
-            $data['accommodation'] = $accommodation;
-            $this->load->view('admin/html-head-admin');
-            $this->load->view('admin/edit_accommodation', $data);
-            $this->load->view('admin/html-footer-admin');
+public function edit_accommodation($id) {
+    $this->check_login();
+
+    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
+        $photos = $this->Photo_model->get_photos_by_accommodation_id($id);
+        if (!$accommodation) {
+            echo json_encode(['status' => 'error', 'message' => 'Acomodação não encontrada.']);
             return;
         }
-    
-        $this->form_validation->set_rules('name', 'Nome', 'required');
-        $this->form_validation->set_rules('description', 'Descrição', 'required');
-        $this->form_validation->set_rules('location', 'Localização', 'required');
-        $this->form_validation->set_rules('price_per_night', 'Preço por Noite', 'required');
-        $this->form_validation->set_rules('num_rooms', 'Número de Quartos', 'required');
-        $this->form_validation->set_rules('num_bathrooms', 'Número de Banheiros', 'required');
-        $this->form_validation->set_rules('max_guests', 'Máximo de Hóspedes', 'required');
-    
-        if ($this->form_validation->run() == FALSE) {
-            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-            return;
-        }
-    
-        $data = array(
-            'name' => $this->input->post('name'),
-            'description' => $this->input->post('description'),
-            'location' => $this->input->post('location'),
-            'price_per_night' => $this->input->post('price_per_night'),
-            'num_rooms' => $this->input->post('num_rooms'),
-            'num_bathrooms' => $this->input->post('num_bathrooms'),
-            'max_guests' => $this->input->post('max_guests')
-        );
-    
-        if ($this->Accommodation_model->update_accommodation($id, $data)) {
-            echo json_encode(['status' => 'success', 'message' => 'Editado com sucesso!']);
-            exit;
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Erro ao editar acomodação.']);
-            exit;
-        }
+        $data['accommodation'] = $accommodation;
+        $data['photos'] = $photos;
+        $data['categories'] = $this->Category_model->get_categories();
+        $this->load->view('admin/html-head-admin');
+        $this->load->view('admin/edit_accommodation', $data);
+        $this->load->view('admin/html-footer-admin');
+        return;
     }
+
+    $this->form_validation->set_rules('name', 'Nome', 'required');
+    $this->form_validation->set_rules('description', 'Descrição', 'required');
+    $this->form_validation->set_rules('location', 'Localização', 'required');
+    $this->form_validation->set_rules('price_per_night', 'Preço por Noite', 'required');
+    $this->form_validation->set_rules('num_rooms', 'Número de Quartos', 'required');
+    $this->form_validation->set_rules('num_bathrooms', 'Número de Banheiros', 'required');
+    $this->form_validation->set_rules('max_guests', 'Máximo de Hóspedes', 'required');
+
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+        return;
+    }
+
+    $data = array(
+        'name' => $this->input->post('name'),
+        'description' => $this->input->post('description'),
+        'location' => $this->input->post('location'),
+        'price_per_night' => $this->input->post('price_per_night'),
+        'num_rooms' => $this->input->post('num_rooms'),
+        'num_bathrooms' => $this->input->post('num_bathrooms'),
+        'max_guests' => $this->input->post('max_guests'),
+        'updated_at' => date('Y-m-d H:i:s')
+    );
+
+    if ($this->Accommodation_model->update_accommodation($id, $data)) {
+        // Verificar se há categorias selecionadas
+        $categories = $this->input->post('categories');
+        if (!empty($categories)) {
+            $this->db->where('accommodation_id', $id);
+            $this->db->delete('accommodations_categories');
+            foreach ($categories as $category_id) {
+                $this->db->insert('accommodations_categories', array(
+                    'accommodation_id' => $id,
+                    'category_id' => $category_id
+                ));
+            }
+        }
+
+        // Verificar se há fotos para upload
+        if (isset($_FILES['photos']) && $_FILES['photos']['name'][0] != '') {
+            $files = $_FILES;
+            $count = count($_FILES['photos']['name']);
+            for($i = 0; $i < $count; $i++) {
+                $_FILES['photo']['name'] = $files['photos']['name'][$i];
+                $_FILES['photo']['type'] = $files['photos']['type'][$i];
+                $_FILES['photo']['tmp_name'] = $files['photos']['tmp_name'][$i];
+                $_FILES['photo']['error'] = $files['photos']['error'][$i];
+                $_FILES['photo']['size'] = $files['photos']['size'][$i];
+
+                $this->upload->initialize($this->set_upload_options());
+                if ($this->upload->do_upload('photo')) {
+                    $upload_data = $this->upload->data();
+                    $file_name = $upload_data['file_name'];
+                    $this->db->insert('accommodation_photos', array(
+                        'accommodation_id' => $id,
+                        'photo' => $file_name
+                    ));
+                } else {
+                    $error = $this->upload->display_errors();
+                    log_message('error', 'Upload error: ' . $error);
+                    echo json_encode(['status' => 'error', 'message' => $error]);
+                    return;
+                }
+            }
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Editado com sucesso!']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Erro ao editar acomodação.']);
+    }
+}
     public function delete_accommodation_ajax() {
         $this->check_login();
         
@@ -245,4 +290,19 @@ private function set_upload_options() {
             echo json_encode(['status' => 'error', 'message' => 'Erro ao excluir acomodação.']);
         }
     }
+
+
+    public function delete_photo() {
+        $this->check_login();
+        $photo_id = $this->input->post('photo_id');
+
+        $this->load->model('Photo_model');
+        if ($this->Photo_model->delete_photo($photo_id)) {
+            echo json_encode(['status' => 'success', 'message' => 'Foto excluída com sucesso!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Erro ao excluir foto.']);
+        }
+
+    }
+   
 }

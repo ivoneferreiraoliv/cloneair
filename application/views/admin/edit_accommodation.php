@@ -53,7 +53,7 @@
     <div class="panel-title">Editar Acomodação</div>
   </div>
   <div class="panel-body">
-  <form class="form-horizontal" id="editAccommodationForm" action="<?php echo base_url('admin/edit_accommodation/' . $accommodation->id); ?>" method="POST" data-id="<?php echo $accommodation->id; ?>">
+  <form class="form-horizontal" id="editAccommodationForm" action="<?php echo base_url('admin/edit_accommodation/' . $accommodation->id); ?>" method="POST" enctype="multipart/form-data">
       
       <!-- Nome -->
       <div class="form-group">
@@ -85,7 +85,7 @@
         <div class="col-md-9">
           <input type="text" class="form-control" id="price_per_night" name="price_per_night" placeholder="Preço por Noite" value="<?php echo number_format($accommodation->price_per_night, 2, ',', '.'); ?>">
         </div>
-      </div> <!-- Faltava esta tag de fechamento -->
+      </div>
 
       <!-- Número de Quartos -->
       <div class="form-group">
@@ -110,21 +110,13 @@
           <input type="number" class="form-control" id="max_guests" name="max_guests" placeholder="Máximo de Hóspedes" value="<?php echo htmlspecialchars($accommodation->max_guests); ?>">
         </div>
       </div>
-      
-      <!-- Data de Criação (somente leitura) -->
-      <div class="form-group">
-        <label for="created_at" class="col-md-3 control-label">Data de Criação</label>
-        <div class="col-md-9">
-          <input type="text" class="form-control" id="created_at" name="created_at" placeholder="Data de Criação" value="<?php echo date('d/m/y', strtotime($accommodation->created_at)); ?>" readonly>
-        </div>
-      </div>
-      
-      <!-- Data de Atualização (somente leitura) -->
-      <div class="form-group">
-        <label for="updated_at" class="col-md-3 control-label">Data de Atualização</label>
-        <div class="col-md-9">
-          <input type="text" class="form-control" id="updated_at" name="updated_at" placeholder="Data de Atualização" value="<?php echo date('d/m/y', strtotime($accommodation->updated_at)); ?>" readonly>
-        </div>
+
+      <!-- Upload de Novas Fotos -->
+      <div class="form-group row">
+          <label for="new_photos" class="col-md-3 control-label">Adicionar Novas Fotos</label>
+          <div class="col-md-9">
+              <input type="file" id="new_photos" name="photos[]" multiple>
+          </div>
       </div>
       
       <!-- Botão de Submissão -->
@@ -134,5 +126,82 @@
         </div>
       </div>
     </form>
+
+    <!-- Exibir Fotos -->
+    <div class="form-group row">
+        <label for="photos" class="col-md-3 control-label">Fotos</label>
+        <div class="col-md-9">
+            <?php if (!empty($photos)): ?>
+                <div class="row">
+                    <?php foreach ($photos as $photo): ?>
+                        <div class="col-md-3">
+                            <img src="<?php echo base_url('uploads/' . $photo['photo']); ?>" class="img-responsive img-thumbnail" alt="Photo">
+                            <button type="button" class="btn btn-danger btn-sm btn-delete-photo" data-photo-id="<?php echo $photo['id']; ?>">Excluir</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p>Nenhuma foto disponível.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
   </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        // Manipular exclusão de fotos
+        $('.btn-delete-photo').on('click', function() {
+            var photoId = $(this).data('photo-id');
+            var $photoDiv = $(this).closest('.col-md-3');
+            
+            if (confirm('Tem certeza de que deseja excluir esta foto?')) {
+                $.ajax({
+                    url: '<?php echo base_url('admin/delete_photo'); ?>',
+                    type: 'POST',
+                    data: {photo_id: photoId},
+                    success: function(response) {
+                        var res = JSON.parse(response);
+                        if (res.status === 'success') {
+                            alert(res.message);
+                            $photoDiv.remove();
+                        } else {
+                            alert(res.message);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert('Erro ao excluir foto: ' + textStatus);
+                    }
+                });
+            }
+        });
+
+        // Manipular upload de novas fotos
+        $('#editAccommodationForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            formData.append('accommodation_id', '<?php echo $accommodation->id; ?>');
+
+            $.ajax({
+                url: '<?php echo base_url('admin/edit_accommodation/' . $accommodation->id); ?>',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    var res = JSON.parse(response);
+                    if (res.status === 'success') {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert('Erro ao fazer upload das fotos: ' + textStatus);
+                }
+            });
+        });
+    });
+</script>
