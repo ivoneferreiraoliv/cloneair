@@ -68,6 +68,9 @@ $route['admin/usuarios/excluir'] = 'users/excluir';
 $route['admin/logout'] = 'admin/logout';
 
 
+
+$route['accommodations/search'] = 'accommodations/search';
+
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
