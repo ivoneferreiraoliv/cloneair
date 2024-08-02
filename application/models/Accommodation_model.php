@@ -12,7 +12,13 @@ class Accommodation_model extends CI_Model {
         if ($limit > 0) {
             $this->db->limit($limit, $offset);
         }
-        $query = $this->db->get('accommodations');
+        $this->db->select('accommodations.*, accommodation_photos.photo, GROUP_CONCAT(categories.name SEPARATOR ", ") as category_names');
+        $this->db->from('accommodations');
+        $this->db->join('accommodation_photos', 'accommodations.id = accommodation_photos.accommodation_id', 'left');
+        $this->db->join('accommodations_categories', 'accommodations_categories.accommodation_id = accommodations.id', 'left');
+        $this->db->join('categories', 'categories.id = accommodations_categories.category_id', 'left');
+        $this->db->group_by('accommodations.id'); 
+        $query = $this->db->get();
         return $query->result();
     }
 
