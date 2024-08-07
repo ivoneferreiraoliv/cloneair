@@ -9,15 +9,21 @@ class Accommodation_model extends CI_Model {
     }
 
     public function get_accommodations($limit, $offset, $category = null, $search_query = null) {
+        $this->db->select('accommodations.*, GROUP_CONCAT(accommodation_photos.photo SEPARATOR ",") as photos');
+        $this->db->from('accommodations');
+        $this->db->join('accommodation_photos', 'accommodations.id = accommodation_photos.accommodation_id', 'left');
+        
         if ($category) {
             $this->db->where('category', $category);
         }
         if ($search_query) {
-            $this->db->like('name', $search_query);
-            $this->db->or_like('description', $search_query);
+            $this->db->like('accommodations.name', $search_query);
+            $this->db->or_like('accommodations.description', $search_query);
         }
+
         $this->db->limit($limit, $offset);
-        $query = $this->db->get('accommodations');
+        $this->db->group_by('accommodations.id');
+        $query = $this->db->get();
         return $query->result();
     }
 

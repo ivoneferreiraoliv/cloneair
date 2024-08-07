@@ -18,12 +18,12 @@ class Home extends CI_Controller {
 
     public function index($page = 0) {
         $category = $this->input->get('category');
-        
+        $search_query = $this->input->get('query');
 
         // Configuração da paginação
         $config = array();
         $config['base_url'] = base_url('home/index');
-        $config['total_rows'] = $this->Accommodation_model->count_all_accommodations($category);
+        $config['total_rows'] = $this->Accommodation_model->count_all_accommodations($category, $search_query);
         $config['per_page'] = 6;
         $config['uri_segment'] = 3;
 
@@ -53,37 +53,35 @@ class Home extends CI_Controller {
         // Calcula o offset
         $offset = $page;
 
-        
-        $data['accommodations'] = $this->Accommodation_model->get_accommodations($config['per_page'], $offset, $category);
-
-        // Passa a paginação para a view
+        // Pega os dados de acomodações
+        $data['accommodations'] = $this->Accommodation_model->get_accommodations($config['per_page'], $offset, $category, $search_query);
+        $data['search_query'] = $search_query;
+        $data['total_accommodations'] = $config['total_rows'];
         $data['pagination'] = $this->pagination->create_links();
 
-       
+        // Carrega as views
         $this->load->view('templates/header.php'); 
         $this->load->view('templates/home.php', $data);
         $this->load->view('templates/footer.php');
     }
 
-
     public function detalhe($id) {
-        // Obtém a acomodação pelo ID
         $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
 
         if (empty($accommodation)) {
             show_404();
         }
 
-        // Manipule as fotos aqui
         if (is_string($accommodation->photos)) {
             $accommodation->photos = explode(',', $accommodation->photos);
         } elseif (!is_array($accommodation->photos)) {
             $accommodation->photos = [];
         }
 
-        // Carregar as views e passar os dados
+        $data['accommodation'] = $accommodation;
+
         $this->load->view('templates/header');
-        $this->load->view('templates/detalhes_accommodations', ['accommodation' => $accommodation]);
+        $this->load->view('templates/detalhes_accommodations', $data);
         $this->load->view('templates/footer');
     }
 }
