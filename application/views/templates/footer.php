@@ -9,6 +9,7 @@
 <script src="<?php echo base_url('assets/js/soft-ui-dashboard.min.js?v=1.0.2'); ?>"></script>
 <link rel="stylesheet" href="<?php echo base_url('assets/css/perfect-scrollbar.min.css'); ?>">
 <script src="<?php echo base_url('assets/js/perfect-scrollbar.min.js'); ?>"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (document.querySelector("#chart-bars")) {

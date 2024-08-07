@@ -60,6 +60,11 @@
     transform: translateY(-50%); /* Centralizar verticalmente */
 }
 
+.category-item.active {
+    border: 2px solid #007bff; /* Exemplo de borda azul */
+    background-color: #f0f0f0; /* Exemplo de fundo cinza claro */
+}
+
 .scroll-button-left {
     left: -15px; /* Mover o botão esquerdo para fora */
 }
@@ -91,7 +96,7 @@
   }
 </style>
 
-<body class="blog-author bg-gray-100">
+<body class="">
   
 <div class="main-content" id="panel">
         <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 mt-3 shadow-none border-radius-xl" id="navbarTop" data-navbar="true" data-navbar-value="49">
@@ -211,56 +216,29 @@
       <!-- menu categorias -->
       <div class="container mt-4">
     <div class="category-menu-container">
-    <button class="scroll-button scroll-button-left">&#9664;</button>
+        <button class="scroll-button scroll-button-left">&#9664;</button>
         <div class="category-menu">
-        <div class="category-item">
-                <img src="<?php echo base_url('assets/img/praia.png'); ?>" alt="Em frente a praia">
-                <p>Em frente a praia</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/pousada.png'); ?>" alt="Pousadas">
-                <p>Pousadas</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/chalé.png'); ?>" alt="Chalés">
-                <p>Chalés</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/fazenda.png'); ?>" alt="Fazendas">
-                <p>Fazendas</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/mansao.png'); ?>" alt="Mansões">
-                <p>Mansões</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/quarto.png'); ?>" alt="Quartos">
-                <p>Quartos</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/economico.png'); ?>" alt="Econômico">
-                <p>Econômico</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/luxo.png'); ?>" alt="Luxo">
-                <p>Luxo</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/casa.png'); ?>" alt="Casa inteira">
-                <p>Casa inteira</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/apartamento.png'); ?>" alt="Apartamento">
-                <p>Apartamento</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/favoritos.png'); ?>" alt="Favoritos">
-                <p>Favoritos</p>
-            </div>
-            <div class="category-item">
-                <img src="<?php echo base_url('assets/img/piscina.png'); ?>" alt="Piscinas Incríveis">
-                <p>Piscinas Incríveis</p>
-            </div>
+            <?php
+            $categories = [
+                'praia' => 'Em frente a praia',
+                'pousada' => 'Pousadas',
+                'chalé' => 'Chalés',
+                'fazenda' => 'Fazendas',
+                'mansao' => 'Mansões',
+                'quarto' => 'Quartos',
+                'economico' => 'Econômico',
+                'luxo' => 'Luxo',
+                'casa' => 'Casa inteira',
+                'apartamento' => 'Apartamento',
+                'favoritos' => 'Favoritos',
+                'piscina' => 'Piscinas Incríveis'
+            ];
+            foreach ($categories as $img => $category): ?>
+                <div class="category-item" data-category="<?php echo $category; ?>">
+                    <img src="<?php echo base_url('assets/img/' . $img . '.png'); ?>" alt="<?php echo $category; ?>">
+                    <p><?php echo $category; ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
         <button class="scroll-button scroll-button-right">&#9654;</button>
     </div>
@@ -311,7 +289,7 @@
                                                         ?>
                                                     </div>
                                                     <div class="d-flex align-items-center justify-content-between mt-2">
-                                                        <button type="button" class="btn btn-outline-primary btn-sm mb-0">Ver detalhes</button>
+                                                    <a href="<?php echo base_url('home/detalhe/' . $accommodation->id); ?>" class="btn btn-outline-primary btn-sm mb-0">Ver detalhes</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -334,23 +312,36 @@
         </div>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                function scrollLeft() {
-                    document.querySelector('.category-menu').scrollBy({
-                        left: -150,
-                        behavior: 'smooth'
-                    });
-                }
-
-                function scrollRight() {
-                    document.querySelector('.category-menu').scrollBy({
-                        left: 150,
-                        behavior: 'smooth'
-                    });
-                }
-
-                // Adiciona os event listeners aos botões
-                document.querySelector('.scroll-button-left').addEventListener('click', scrollLeft);
-                document.querySelector('.scroll-button-right').addEventListener('click', scrollRight);
+    document.addEventListener('DOMContentLoaded', function() {
+        function scrollLeft() {
+            document.querySelector('.category-menu').scrollBy({
+                left: -150,
+                behavior: 'smooth'
             });
-        </script>
+        }
+
+        function scrollRight() {
+            document.querySelector('.category-menu').scrollBy({
+                left: 150,
+                behavior: 'smooth'
+            });
+        }
+
+        document.querySelector('.scroll-button-left').addEventListener('click', scrollLeft);
+        document.querySelector('.scroll-button-right').addEventListener('click', scrollRight);
+
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove a classe 'active' de todos os itens
+                document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                
+                // Adiciona a classe 'active' ao item clicado
+                this.classList.add('active');
+                
+                // Redireciona para a URL com a categoria selecionada
+                const category = this.getAttribute('data-category');
+                window.location.href = '<?php echo base_url("home/index"); ?>?category=' + encodeURIComponent(category);
+            });
+        });
+    });
+</script>
