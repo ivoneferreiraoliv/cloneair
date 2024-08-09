@@ -76,19 +76,27 @@ class Home extends CI_Controller {
     }
     public function detalhe($id) {
         $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
-
+    
         if (empty($accommodation)) {
             show_404();
         }
-
-        if (is_string($accommodation->photos)) {
-            $accommodation->photos = explode(',', $accommodation->photos);
-        } elseif (!is_array($accommodation->photos)) {
-            $accommodation->photos = [];
+    
+        // Se não houver fotos, adiciona uma imagem padrão
+        if (empty($accommodation->photos)) {
+            $accommodation->photos = ['default.jpg'];
+        } else {
+            // Se fotos existirem, garanta que estão em formato de array
+            if (is_string($accommodation->photos)) {
+                $accommodation->photos = explode(',', $accommodation->photos);
+            } elseif (!is_array($accommodation->photos)) {
+                $accommodation->photos = ['default.jpg'];
+            }
         }
+        
+        
 
         $data['accommodation'] = $accommodation;
-
+    
         $this->load->view('templates/header');
         $this->load->view('templates/detalhes_accommodations', $data);
         $this->load->view('templates/footer');

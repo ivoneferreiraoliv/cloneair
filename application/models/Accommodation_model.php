@@ -89,7 +89,7 @@ class Accommodation_model extends CI_Model {
     }
 
     public function get_accommodation_by_id($id) {
-        $this->db->select('accommodations.*, GROUP_CONCAT(accommodation_photos.photo SEPARATOR ",") as photos, GROUP_CONCAT(categories.name SEPARATOR ", ") as category_names');
+        $this->db->select('accommodations.*, GROUP_CONCAT(DISTINCT accommodation_photos.photo SEPARATOR ",") as photos, GROUP_CONCAT(DISTINCT categories.name SEPARATOR ", ") as category_names');
         $this->db->from('accommodations');
         $this->db->join('accommodation_photos', 'accommodations.id = accommodation_photos.accommodation_id', 'left');
         $this->db->join('accommodations_categories', 'accommodations_categories.accommodation_id = accommodations.id', 'left');
@@ -98,9 +98,21 @@ class Accommodation_model extends CI_Model {
         $this->db->group_by('accommodations.id');
         $query = $this->db->get();
         $result = $query->row();
+        
         if ($result) {
-            $result->photos = explode(',', $result->photos);
+            if (!empty($result->photos)) {
+                // Explode the photos string into an array
+                $photos = explode(',', $result->photos);
+                // Remove any empty or whitespace-only strings
+                $photos = array_filter($photos, function($photo) {
+                    return !empty(trim($photo));
+                });
+                $result->photos = $photos;
+            } else {
+                $result->photos = [];
+            }
         }
+    
         return $result;
     }
 
