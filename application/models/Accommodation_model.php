@@ -8,34 +8,84 @@ class Accommodation_model extends CI_Model {
         $this->load->database();
     }
 
-    public function get_accommodations($limit, $offset, $category = null, $search_query = null) {
-        $this->db->select('accommodations.*, GROUP_CONCAT(accommodation_photos.photo SEPARATOR ",") as photos');
+    public function get_accommodations($limit = 0, $offset = 0, $category_id = null, $search_query = null) {
+        $this->db->select('accommodations.*, GROUP_CONCAT(DISTINCT accommodation_photos.photo SEPARATOR ",") as photos, GROUP_CONCAT(DISTINCT categories.name SEPARATOR ", ") as category_names');
         $this->db->from('accommodations');
         $this->db->join('accommodation_photos', 'accommodations.id = accommodation_photos.accommodation_id', 'left');
-        
-        if ($category) {
-            $this->db->where('category', $category);
+        $this->db->join('accommodations_categories', 'accommodations_categories.accommodation_id = accommodations.id', 'left');
+        $this->db->join('categories', 'categories.id = accommodations_categories.category_id', 'left');
+    
+        if ($category_id) {
+            $this->db->where('accommodations_categories.category_id', $category_id);
         }
+    
         if ($search_query) {
+            $this->db->group_start();
             $this->db->like('accommodations.name', $search_query);
             $this->db->or_like('accommodations.description', $search_query);
+            $this->db->group_end();
         }
-
-        $this->db->limit($limit, $offset);
+    
         $this->db->group_by('accommodations.id');
+        $this->db->limit($limit, $offset);
         $query = $this->db->get();
         return $query->result();
     }
 
-    public function count_all_accommodations($category = null, $search_query = null) {
-        if ($category) {
-            $this->db->where('category', $category);
+    public function count_all_accommodations($category_id = null, $search_query = null) {
+        $this->db->select('COUNT(DISTINCT accommodations.id) as total');
+        $this->db->from('accommodations');
+        $this->db->join('accommodations_categories', 'accommodations_categories.accommodation_id = accommodations.id', 'left');
+    
+        if ($category_id) {
+            $this->db->where('accommodations_categories.category_id', $category_id);
         }
+    
         if ($search_query) {
-            $this->db->like('name', $search_query);
-            $this->db->or_like('description', $search_query);
+            $this->db->group_start();
+            $this->db->like('accommodations.name', $search_query);
+            $this->db->or_like('accommodations.description', $search_query);
+            $this->db->group_end();
         }
-        return $this->db->count_all_results('accommodations');
+    
+        $query = $this->db->get();
+        return $query->row()->total;
+    }
+
+    public function get_accommodations_with_categories($limit, $offset, $category_id = null, $search_query = null) {
+        $this->db->select('accommodations.*, GROUP_CONCAT(categories.name SEPARATOR ", ") as category_names');
+        $this->db->from('accommodations');
+        $this->db->join('accommodations_categories', 'accommodations.id = accommodations_categories.accommodation_id', 'left');
+        $this->db->join('categories', 'accommodations_categories.category_id = categories.id', 'left');
+        
+        // Ajuste na cláusula WHERE para refletir a relação correta
+        if ($category_id) {
+            $this->db->where('categories.id', $category_id);
+        }
+    
+        if ($search_query) {
+            $this->db->like('accommodations.title', $search_query);
+            $this->db->or_like('accommodations.description', $search_query);
+        }
+    
+        $this->db->limit($limit, $offset);
+        $this->db->group_by('accommodations.id');
+        $query = $this->db->get();
+    
+        return $query->result();
+    }
+
+    public function get_accommodations_by_category($category_name) {
+        $this->db->select('accommodations.*, GROUP_CONCAT(accommodation_photos.photo SEPARATOR ", ") as photos, GROUP_CONCAT(categories.name SEPARATOR ", ") as category_names');
+        $this->db->from('accommodations');
+        $this->db->join('accommodation_photos', 'accommodations.id = accommodation_photos.accommodation_id', 'left');
+        $this->db->join('accommodations_categories', 'accommodations_categories.accommodation_id = accommodations.id', 'left');
+        $this->db->join('categories', 'categories.id = accommodations_categories.category_id', 'left');
+        $this->db->where('categories.name', $category_name); // Corrigido para usar a coluna 'name' da tabela 'categories'
+        $this->db->group_by('accommodations.id');
+        $this->db->limit(6);
+        $query = $this->db->get();
+        return $query->result();
     }
 
     public function get_accommodation_by_id($id) {

@@ -6,57 +6,81 @@
     border-radius: 8px; /* Adiciona cantos arredondados */
     overflow: hidden; /* Garante que o conteúdo do card respeite as bordas arredondadas */
     text-align: center; /* Centraliza o texto */
+    display: flex;
+    flex-direction: column; /* Garante que o conteúdo do card seja distribuído verticalmente */
+    height: 100%; /* Garante que todos os cards tenham a mesma altura */
+}
+
+.card-img-top {
+    width: 100%;
+    height: 200px; /* Defina uma altura fixa para as imagens */
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorção */
 }
 
 .card-body {
-    text-align: center; /* Centraliza o texto */
+    flex-grow: 1; /* Faz com que o card body ocupe o espaço disponível */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Espaça uniformemente os elementos no card body */
+    padding: 15px;
 }
+
 .card-body .btn {
     margin: 0 auto; /* Centraliza o botão */
     display: block; /* Garante que o botão seja exibido como bloco */
 }
 </style>
-<div class="row">
-    <?php if (!empty($accommodations)): ?>
-        <?php foreach ($accommodations as $accommodation): ?>
-            <div class="col-xl-4 col-md-6 mb-4">
-                <div class="card card-blog card-plain">
-                    <div class="position-relative">
-                        <a class="d-block shadow-xl border-radius-xl">
-                            <?php
-                            $image_url = !empty($accommodation->photos) ? base_url('uploads/' . explode(',', $accommodation->photos)[0]) : base_url('uploads/default.jpg');
-                            ?>
-                            <img src="<?php echo $image_url; ?>" alt="Imagem da Acomodação" class="img-fluid shadow border-radius-xl">
-                        </a>
-                    </div>
-                    <div class="card-body px-1 pb-0">
-                        <p class="text-gradient text-dark mb-2 text-sm"><?php echo $accommodation->name; ?></p>
-                        <p class="mb-4 text-sm"><?php echo $accommodation->description; ?></p>
-                        <p><strong>Localização:</strong> <?php echo $accommodation->location; ?></p>
-                        <p><strong>Preço por noite:</strong> R$ <?php echo number_format($accommodation->price_per_night, 2, ',', '.'); ?></p>
-                        <p><strong>Quartos:</strong> <?php echo $accommodation->num_rooms; ?></p>
-                        <p><strong>Banheiros:</strong> <?php echo $accommodation->num_bathrooms; ?></p>
-                        <p><strong>Máximo de hóspedes:</strong> <?php echo $accommodation->max_guests; ?></p>
-                        <div>
-                            <?php 
-                            if (!empty($accommodation->category_names)) {
-                                $categories = explode(',', $accommodation->category_names);
-                                foreach ($categories as $category): ?>
-                                    <span class="badge bg-gradient-primary badge-small"><?php echo $category; ?></span>
-                                <?php endforeach;
-                            } else {
-                                echo '<span class="badge bg-gradient-secondary badge-small">Sem categorias</span>';
-                            }
-                            ?>
+
+<div class="container-fluid pt-3">
+    <div class="row removable mb-4">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 p-3">
+                    <h6 class="mb-1">
+                        Acomodações
+                        <?php if (isset($search_query) && !empty($search_query)): ?>
+                            - Resultados da busca para "<?php echo htmlspecialchars($search_query); ?>"
+                            (<?php echo isset($total_accommodations) ? $total_accommodations : 0; ?> encontradas)
+                        <?php elseif (isset($category_name) && (is_string($category_name) || is_object($category_name))): ?>
+                            - Categoria: <?php echo is_string($category_name) ? htmlspecialchars($category_name) : htmlspecialchars($category_name->name); ?>
+                            (<?php echo isset($total_accommodations) ? $total_accommodations : 0; ?> encontradas)
+                        <?php endif; ?>
+                    </h6>
+                </div>
+                <!-- Corpo do Card -->
+                <div class="card-body p-3">
+                    <?php if (!empty($accommodations)): ?>
+                        <div class="row">
+                            <?php foreach ($accommodations as $accommodation): ?>
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <img src="<?php echo base_url('uploads/' . (!empty($accommodation->photos) ? explode(',', $accommodation->photos)[0] : 'default.jpg')); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($accommodation->name); ?>">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><?php echo htmlspecialchars($accommodation->name); ?></h5>
+                                            <p class="card-text"><?php echo htmlspecialchars($accommodation->description); ?></p>
+                                            <?php if (!empty($accommodation->category_names)): ?>
+                                                <p>
+                                                    <?php foreach (explode(',', $accommodation->category_names) as $category_name): ?>
+                                                        <span class="badge bg-info"><?php echo htmlspecialchars($category_name); ?></span>
+                                                    <?php endforeach; ?>
+                                                </p>
+                                            <?php endif; ?>
+                                            <a href="<?php echo base_url('home/detalhe/' . $accommodation->id); ?>" class="btn btn-primary">Ver detalhes</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <div class="d-flex align-items-center justify-content-between mt-2">
-                            <a href="<?php echo base_url('home/detalhe/' . $accommodation->id); ?>" class="btn btn-outline-primary btn-sm mb-0">Ver detalhes</a>
-                        </div>
+                    <?php else: ?>
+                        <p>Nenhuma acomodação encontrada.</p>
+                    <?php endif; ?>
+                </div>
+                <div class="row text-center py-2">
+                    <div class="col-4 mx-auto">
+                        <?php echo $pagination; ?>
                     </div>
                 </div>
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p>Nenhuma acomodação encontrada</p>
-    <?php endif; ?>
+        </div>
+    </div>
 </div>

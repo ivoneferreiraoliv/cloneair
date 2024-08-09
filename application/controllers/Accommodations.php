@@ -25,6 +25,10 @@ class Accommodations extends CI_Controller {
         $config['total_rows'] = $this->Accommodation_model->count_all_accommodations($category, $search_query);
         $config['per_page'] = 6;
         $config['uri_segment'] = 3;
+
+        // mantém os parâmetros de categoria e busca na URL
+        $config['suffix'] = '?category=' . $category . '&query=' . urlencode($search_query);
+        $config['first_url'] = $config['base_url'] . $config['suffix'];
     
         // Customização da paginação
         $config['full_tag_open'] = '<ul class="pagination pagination-primary m-4">';
@@ -61,6 +65,7 @@ class Accommodations extends CI_Controller {
         // Carrega as views
         $this->load->view('templates/header.php'); 
         $this->load->view('templates/search_results.php', $data);
+        
         $this->load->view('templates/footer.php');
     }
 }

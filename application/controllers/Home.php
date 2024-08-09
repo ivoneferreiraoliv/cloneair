@@ -6,6 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @property CI_Input $input
  * @property CI_Pagination $pagination
  * @property Accommodation_model $Accommodation_model
+ * @property Category_model $Category_model
  */
 
 class Home extends CI_Controller {
@@ -13,20 +14,25 @@ class Home extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('Accommodation_model');
+        $this->load->model('Category_model');
         $this->load->library('pagination');
     }
 
     public function index($page = 0) {
-        $category = $this->input->get('category');
+        $category_id = $this->input->get('category');
         $search_query = $this->input->get('query');
-
+    
         // Configuração da paginação
         $config = array();
         $config['base_url'] = base_url('home/index');
-        $config['total_rows'] = $this->Accommodation_model->count_all_accommodations($category, $search_query);
+        $config['total_rows'] = $this->Accommodation_model->count_all_accommodations($category_id, $search_query);
         $config['per_page'] = 6;
         $config['uri_segment'] = 3;
-
+    
+        // Adiciona os parâmetros de categoria e busca na URL
+        $config['suffix'] = '?category=' . $category_id . '&query=' . urlencode($search_query);
+        $config['first_url'] = $config['base_url'] . $config['suffix'];
+    
         // Customização da paginação
         $config['full_tag_open'] = '<ul class="pagination pagination-primary m-4">';
         $config['full_tag_close'] = '</ul>';
@@ -47,24 +53,27 @@ class Home extends CI_Controller {
         $config['num_tag_open'] = '<li class="page-item">';
         $config['num_tag_close'] = '</li>';
         $config['attributes'] = array('class' => 'page-link');
-
+    
         $this->pagination->initialize($config);
-
+    
         // Calcula o offset
         $offset = $page;
-
+    
         // Pega os dados de acomodações
-        $data['accommodations'] = $this->Accommodation_model->get_accommodations($config['per_page'], $offset, $category, $search_query);
+        $data['accommodations'] = $this->Accommodation_model->get_accommodations($config['per_page'], $offset, $category_id, $search_query);
+        $data['categories'] = $this->Category_model->get_all_categories();
         $data['search_query'] = $search_query;
         $data['total_accommodations'] = $config['total_rows'];
         $data['pagination'] = $this->pagination->create_links();
-
+        $category_name = $this->Category_model->get_category_by_id($category_id); 
+        $data['category_name'] = $category_name;
+        
         // Carrega as views
         $this->load->view('templates/header.php'); 
-        $this->load->view('templates/home.php', $data);
+        $this->load->view('templates/home', $data); // Corrija o nome da view conforme necessário
+        $this->load->view('partials/accommodation_list', $data);
         $this->load->view('templates/footer.php');
     }
-
     public function detalhe($id) {
         $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
 

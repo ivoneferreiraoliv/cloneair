@@ -1,46 +1,78 @@
 <style>
-  .category-menu-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 5px 0; /* Reduzir o padding para diminuir a altura */
-}
+ .category-menu-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        padding: 5px 0;
+    }
 
-.category-menu {
-    display: flex;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    gap: 20px; /* Ajustar o gap entre categorias */
-    flex: 1;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-}
+    .category-menu {
+        display: flex;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        gap: 20px;
+        flex: 1;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 
-.category-menu::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera */
-}
+    .category-menu::-webkit-scrollbar {
+        display: none;
+    }
 
-.category-item {
-    text-align: center;
-    min-width: 80px; /* Reduzir a largura mínima */
-    box-sizing: border-box;
-}
+    .category-item {
+        text-align: center;
+        min-width: 80px;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
 
-.category-item img {
-    width: 40px; /* Reduzir largura */
-    height: 40px; /* Reduzir altura */
-    max-width: 100%; /* Garantir que a imagem não exceda o contêiner */
-    max-height: 100%; /* Garantir que a imagem não exceda o contêiner */
-    object-fit: contain; /* Conter a imagem dentro das dimensões */
-    margin-bottom: 2px; /* Ajustar a margem inferior */
-}
+    .category-item img {
+        width: 40px;
+        height: 40px;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        margin-bottom: 2px;
+    }
 
-.category-item p {
-    margin-top: 0; /* Remover qualquer margem superior */
-    margin-bottom: 0; /* Remover qualquer margem inferior */
-    font-size: 0.8em; /* Ajustar o tamanho da fonte */
-}
+    .category-item p {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: 0.8em;
+    }
+
+    .scroll-button {
+        background-color: #e0e0e0;
+        color: #333;
+        border: none;
+        padding: 5px;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .category-item.active {
+        border: 2px solid #007bff;
+        background-color: #f0f0f0;
+    }
+
+    .category-title {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #007bff;
+    }
 
 .scroll-button {
     background-color: #e0e0e0; /* Cor neutra */
@@ -63,14 +95,6 @@
 .category-item.active {
     border: 2px solid #007bff; /* Exemplo de borda azul */
     background-color: #f0f0f0; /* Exemplo de fundo cinza claro */
-}
-
-.scroll-button-left {
-    left: -15px; /* Mover o botão esquerdo para fora */
-}
-
-.scroll-button-right {
-    right: -15px; /* Mover o botão direito para fora */
 }
     .card img {
         width: 100%; 
@@ -101,13 +125,13 @@
 <div class="main-content" id="panel">
         <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 mt-3 shadow-none border-radius-xl" id="navbarTop" data-navbar="true" data-navbar-value="49">
             <div class="container-fluid py-1 px-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                        <li class="breadcrumb-item text-sm"><a class="" href="javascript:;"></a></li>
-                        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Home</li>
-                    </ol>
-                    <h6 class="font-weight-bolder mb-0">Clone AirBnb</h6>
-                </nav>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                    <li class="breadcrumb-item text-sm"><a class="" href="<?php echo base_url('home'); ?>">Home</a></li>
+                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Página Inicial</li>
+                </ol>
+                <h6 class="font-weight-bolder mb-0"><a href="<?php echo base_url('home'); ?>" class="text-dark">Clone AirBnb</a></h6>
+            </nav>
                 <div class="ms-md-auto pe-md-3 d-flex align-items-center">
                   <form action="<?php echo base_url('accommodations/search'); ?>" method="GET" class="input-group">
                       <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
@@ -213,88 +237,49 @@
             </div>
         </nav>
 
-      <!-- menu categorias -->
-      <div class="container mt-4">
-    <div class="category-menu-container">
-        <button class="scroll-button scroll-button-left">&#9664;</button>
-        <div class="category-menu">
-            <?php
-            $categories = [
-                'praia' => 'Em frente a praia',
-                'pousada' => 'Pousadas',
-                'chalé' => 'Chalés',
-                'fazenda' => 'Fazendas',
-                'mansao' => 'Mansões',
-                'quarto' => 'Quartos',
-                'economico' => 'Econômico',
-                'luxo' => 'Luxo',
-                'casa' => 'Casa inteira',
-                'apartamento' => 'Apartamento',
-                'favoritos' => 'Favoritos',
-                'piscina' => 'Piscinas Incríveis'
-            ];
-            foreach ($categories as $img => $category): ?>
-                <div class="category-item" data-category="<?php echo $category; ?>">
-                    <img src="<?php echo base_url('assets/img/' . $img . '.png'); ?>" alt="<?php echo $category; ?>">
-                    <p><?php echo $category; ?></p>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <button class="scroll-button scroll-button-right">&#9654;</button>
-    </div>
-</div>
-
-<div class="container-fluid pt-3">
-            <div class="row removable mb-4">
-                <div class="col-12">
-                    <div class="card mb-4">
-                        <div class="card-header pb-0 p-3">
-                            <h6 class="mb-1">Acomodações</h6>
-                        </div>
-                        <div class="card-body p-3">
-                        <?php $this->load->view('partials/accommodation_list', ['accommodations' => $accommodations]); ?>
-                    <!-- Exibir a paginação aqui -->
-                    <div class="row text-center py-2">
-                        <div class="col-4 mx-auto">
-                            <?php echo $pagination; ?>
-                        </div>
+    <!-- menu categorias -->
+    <div class="container mt-4">
+        <div class="category-menu-container">
+            <div class="category-menu">
+                <?php foreach ($categories as $category): ?>
+                    <div class="category-item" data-category="<?php echo $category['id']; ?>">
+                        <img src="<?php echo base_url('assets/img/' . strtolower($category['name']) . '.png'); ?>" alt="<?php echo $category['name']; ?>">
+                        <p><?php echo $category['name']; ?></p>
                     </div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>
+
+    <?php if (!empty($selected_category_name)): ?>
+        <div class="category-title"><?php echo htmlspecialchars($selected_category_name); ?></div>
+    <?php endif; ?>
 </div>
 
-        <script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-        function scrollLeft() {
-            document.querySelector('.category-menu').scrollBy({
-                left: -150,
-                behavior: 'smooth'
+        const currentCategoryId = '<?php echo isset($selected_category_id) ? $selected_category_id : ''; ?>';
+
+        // Adicionar classe ativa ao item de categoria selecionado
+        if (currentCategoryId) {
+            document.querySelectorAll('.category-item').forEach(item => {
+                if (item.getAttribute('data-category') === currentCategoryId) {
+                    item.classList.add('active');
+                }
             });
         }
-
-        function scrollRight() {
-            document.querySelector('.category-menu').scrollBy({
-                left: 150,
-                behavior: 'smooth'
-            });
-        }
-
-        document.querySelector('.scroll-button-left').addEventListener('click', scrollLeft);
-        document.querySelector('.scroll-button-right').addEventListener('click', scrollRight);
 
         document.querySelectorAll('.category-item').forEach(item => {
             item.addEventListener('click', function() {
                 // Remove a classe 'active' de todos os itens
                 document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
-                
+
                 // Adiciona a classe 'active' ao item clicado
                 this.classList.add('active');
-                
-                // Redireciona para a URL com a categoria selecionada
-                const category = this.getAttribute('data-category');
-                window.location.href = '<?php echo base_url("home/index"); ?>?category=' + encodeURIComponent(category);
+
+                // Redireciona para a URL com o ID da categoria selecionada
+                const categoryId = this.getAttribute('data-category');
+                window.location.href = '<?php echo base_url("home/index"); ?>?category=' + encodeURIComponent(categoryId);
             });
         });
     });

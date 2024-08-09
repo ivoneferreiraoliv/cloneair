@@ -34,13 +34,13 @@ body {
 <div class="main-content" id="panel">
         <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 mt-3 shadow-none border-radius-xl" id="navbarTop" data-navbar="true" data-navbar-value="49">
             <div class="container-fluid py-1 px-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
-                        <li class="breadcrumb-item text-sm"><a class="" href="javascript:;"></a></li>
-                        <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Busca</li>
-                    </ol>
-                    <h6 class="font-weight-bolder mb-0">Clone AirBnb</h6>
-                </nav>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                    <li class="breadcrumb-item text-sm"><a class="" href="<?php echo base_url('home'); ?>">Home</a></li>
+                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Busca</li>
+                </ol>
+                <h6 class="font-weight-bolder mb-0"><a href="<?php echo base_url('home'); ?>" class="text-dark">Clone AirBnb</a></h6>
+            </nav>
                 <div class="ms-md-auto pe-md-3 d-flex align-items-center">
                   <form action="<?php echo base_url('accommodations/search'); ?>" method="GET" class="input-group">
                       <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
@@ -147,20 +147,10 @@ body {
         </nav>
 
         <!-- Resultados da busca -->
-        <div class="container-fluid pt-3">
-            <div class="row removable mb-4">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0 p-3">
-                    <h6 class="mb-1">Acomodações (<?php echo isset($total_accommodations) ? $total_accommodations : 0; ?> encontradas)</h6>
-                </div>
-                <div class="card-body p-3">
+       
                 <?php $this->load->view('partials/accommodation_list', ['accommodations' => $accommodations]); ?>
-                    <!-- Exibir a paginação aqui -->
-                    <div class="row text-center py-2">
-                        <div class="col-4 mx-auto">
-                            <?php echo $pagination; ?>
-                        </div>
+                    
+                    
                     </div>
                 </div>
             </div>
