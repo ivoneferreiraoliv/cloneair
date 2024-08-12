@@ -1,14 +1,18 @@
 <style>
+    .badge-small {
+        font-size: 0.65em;
+        padding: 0.50em 0.5em; 
+    }
 .card {
     margin-bottom: 20px; /* Ajuste o valor conforme necessário */
     border: 1px solid #ddd; /* Adiciona uma borda leve */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adiciona uma sombra */
-    border-radius: 8px; /* Adiciona cantos arredondados */
-    overflow: hidden; /* Garante que o conteúdo do card respeite as bordas arredondadas */
-    text-align: center; /* Centraliza o texto */
+    border-radius: 8px; 
+    overflow: hidden; 
+    text-align: center; 
     display: flex;
-    flex-direction: column; /* Garante que o conteúdo do card seja distribuído verticalmente */
-    height: 100%; /* Garante que todos os cards tenham a mesma altura */
+    flex-direction: column; 
+    height: 100%; 
 }
 
 .card-img-top {
@@ -61,7 +65,7 @@
                                             <?php if (!empty($accommodation->category_names)): ?>
                                                 <p>
                                                     <?php foreach (explode(',', $accommodation->category_names) as $category_name): ?>
-                                                        <span class="badge bg-info"><?php echo htmlspecialchars($category_name); ?></span>
+                                                        <span class="badge bg-info badge-small"><?php echo htmlspecialchars($category_name); ?></span>
                                                     <?php endforeach; ?>
                                                 </p>
                                             <?php endif; ?>

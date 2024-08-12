@@ -66,10 +66,13 @@ $route['admin/usuarios/editar/(:num)'] = 'users/editar/$1';
 $route['admin/usuarios/excluir'] = 'users/excluir';
 
 $route['admin/logout'] = 'admin/logout';
-
+//
 
 
 $route['accommodations/search'] = 'accommodations/search';
+$route['accommodations/reservar'] = 'accommodations/reservar';
+$route['accommodations/detalhes/(:num)'] = 'accommodations/detalhes/$1';
+
 
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

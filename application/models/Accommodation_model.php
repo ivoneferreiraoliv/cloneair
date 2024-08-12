@@ -155,4 +155,16 @@ class Accommodation_model extends CI_Model {
         return $query->result();
     }
 
+    public function set_reservation_data($accommodation_id, $price_per_night, $checkin_date, $checkout_date, $guests) {
+        $reservation = array(
+            'accommodation_id' => $accommodation_id,
+            'price_per_night' => $price_per_night,
+            'checkin_date' => $checkin_date,
+            'checkout_date' => $checkout_date,
+            'guests' => $guests
+        );
+
+        $this->session->set_userdata('reservation', $reservation);
+    }
+
 }

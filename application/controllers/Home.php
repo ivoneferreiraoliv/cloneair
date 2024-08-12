@@ -21,7 +21,7 @@ class Home extends CI_Controller {
     public function index($page = 0) {
         $category_id = $this->input->get('category');
         $search_query = $this->input->get('query');
-    
+        
         // Configuração da paginação
         $config = array();
         $config['base_url'] = base_url('home/index');
@@ -67,36 +67,52 @@ class Home extends CI_Controller {
         $data['pagination'] = $this->pagination->create_links();
         $category_name = $this->Category_model->get_category_by_id($category_id); 
         $data['category_name'] = $category_name;
+    
+        // Armazena o URL atual na sessão
+        $current_url = current_url() . '?' . $_SERVER['QUERY_STRING'];
+        $this->session->set_userdata('previous_accommodations_url', $current_url);
         
         // Carrega as views
         $this->load->view('templates/header.php'); 
-        $this->load->view('templates/home', $data); // Corrija o nome da view conforme necessário
+        $this->load->view('templates/home', $data); 
         $this->load->view('partials/accommodation_list', $data);
         $this->load->view('templates/footer.php');
     }
     public function detalhe($id) {
+        // Busca os dados da acomodação pelo ID
         $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
-    
+        $this->session->set_userdata('previous_url', $_SERVER['HTTP_REFERER']);
+        // Verifica se a acomodação existe, se não, mostra a página 404
         if (empty($accommodation)) {
             show_404();
         }
     
-        // Se não houver fotos, adiciona uma imagem padrão
+        // Processa as fotos da acomodação
         if (empty($accommodation->photos)) {
             $accommodation->photos = ['default.jpg'];
         } else {
-            // Se fotos existirem, garanta que estão em formato de array
             if (is_string($accommodation->photos)) {
                 $accommodation->photos = explode(',', $accommodation->photos);
             } elseif (!is_array($accommodation->photos)) {
                 $accommodation->photos = ['default.jpg'];
+            } else {
+                $accommodation->photos = array_map('trim', $accommodation->photos);
             }
         }
-        
-        
-
+    
+        // Armazena as informações necessárias na sessão
+        $this->session->set_userdata('reservation', [
+            'accommodation_id' => $accommodation->id,
+            'price_per_night' => $accommodation->price_per_night,
+            'checkin_date' => $this->input->post('checkin_date'),
+            'checkout_date' => $this->input->post('checkout_date'),
+            'guests' => $this->input->post('guests')
+        ]);
+    
+        // Prepara os dados para a view
         $data['accommodation'] = $accommodation;
     
+        // Carrega as views com os dados necessários
         $this->load->view('templates/header');
         $this->load->view('templates/detalhes_accommodations', $data);
         $this->load->view('templates/footer');

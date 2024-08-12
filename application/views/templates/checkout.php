@@ -1,58 +1,49 @@
-<style>
-    .badge-small {
-        font-size: 0.65em;
-        padding: 0.25em 0.4em; 
-    }
-    .carousel-item img {
-    width: 100%;
-    height: 400px; /* Defina a altura desejada */
-    object-fit: cover; /* Mantém o aspecto da imagem sem distorção */
-}
-    /* Centraliza o conteúdo e coloca os textos lado a lado */
-.accommodation-details {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-top: 20px;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva/Checkout</title>
+    <link href="./assets/css/nucleo-icons.css" rel="stylesheet" />
+    <link href="./assets/css/nucleo-svg.css" rel="stylesheet" />
+    <link href="./assets/css/soft-design-system.css?v=1.0.9" rel="stylesheet" />
+    <style>
+        .reservation-summary,
+        .payment-section,
+        .policy-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+        }
 
-/* Ajuste das colunas */
-.accommodation-info, .reservation-card {
-    flex: 1 1 45%; /* Flexível para ocupar metade do espaço disponível */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 20px;
-}
+        .total-price {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
 
-/* Ajuste no conteúdo do formulário de reserva */
-.reservation-card {
-    max-width: 400px;
-}
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+        }
 
-/* Borda no container principal */
-.card-profile {
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    padding: 20px;
-}
-
-/* Estilo para as imagens do carrossel */
-.carousel-image {
-    max-height: 400px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-</style>
-<nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 mt-3 shadow-none border-radius-xl" id="navbarTop" data-navbar="true" data-navbar-value="49">
+        .policy-section h6 {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<?php
+/**
+ * @var object $accommodation
+ */
+?>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 mt-3 shadow-none border-radius-xl" id="navbarTop" data-navbar="true" data-navbar-value="49">
             <div class="container-fluid py-1 px-3">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
                     <li class="breadcrumb-item text-sm"><a class="" href="<?php echo base_url('home'); ?>">Home</a></li>
-                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Detalhes da acomodação</li>
+                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Reservar</li>
                 </ol>
                 <h6 class="font-weight-bolder mb-0"><a href="<?php echo base_url('home'); ?>" class="text-dark">Clone AirBnb</a></h6>
             </nav>
@@ -161,109 +152,79 @@
             </div>
         </nav>
 
-        <div class="container mt-5">
-        <?php $previous_url = $this->session->userdata('previous_accommodations_url'); ?>
-            <a href="javascript:void(0);" onclick="window.location.href='<?php echo htmlspecialchars($previous_url); ?>';" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Voltar</a>
 
-            <div class="card card-profile shadow-lg">
-        <div class="card-body">
-            <?php if (!empty($accommodation)): ?>
-                <div id="accommodationCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
-        <?php
-        // Verifica se a acomodação tem fotos, caso contrário, adiciona uma imagem padrão
-        $photos = !empty($accommodation->photos) ? $accommodation->photos : ['default.jpg'];
+		
+		<div class="container mt-5">
+    <form id="backForm" action="<?php echo base_url('accommodations/detalhes/' . $reservation['accommodation_id']); ?>" method="POST" style="display: none;">
+        <input type="hidden" name="price_per_night" value="<?php echo $reservation['price_per_night']; ?>">
+        <input type="hidden" name="checkin_date" value="<?php echo $reservation['checkin_date']; ?>">
+        <input type="hidden" name="checkout_date" value="<?php echo $reservation['checkout_date']; ?>">
+        <input type="hidden" name="guests" value="<?php echo $reservation['guests']; ?>">
+    </form>
 
-        foreach ($photos as $index => $photo):
-            // Trim elimina espaços em branco ao redor do nome da imagem
-            $photo = trim($photo);
+    <!-- Botão Voltar -->
+    <?php $previous_details_url = $this->session->userdata('previous_details_url'); ?>
+<a href="javascript:void(0);" onclick="window.location.href='<?php echo htmlspecialchars($previous_details_url); ?>';" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Voltar</a>
 
-            
-            if (!empty($photo)):
-        ?>
-            <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-                <img src="<?php echo base_url('uploads/' . htmlspecialchars($photo)); ?>" class="d-block w-100 carousel-image" alt="Imagem da Acomodação">
+    <div class="row">
+        <!-- Detalhes da Reserva -->
+        <div class="col-md-7">
+            <div class="reservation-summary">
+                <h5>Sua reserva</h5>
+                <p>Datas: <strong><?php echo isset($reservation['checkin_date']) ? htmlspecialchars($reservation['checkin_date']) : 'N/A'; ?></strong> até <strong><?php echo isset($reservation['checkout_date']) ? htmlspecialchars($reservation['checkout_date']) : 'N/A'; ?></strong></p>
+                <p>Hóspedes: <strong><?php echo isset($guests) ? htmlspecialchars($guests) : 'N/A'; ?> Hóspedes</strong></p>
             </div>
-        <?php
-            endif;
-        endforeach;
-        ?>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#accommodationCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Próximo</span>
-    </button>
-</div>
 
-<div class="accommodation-details mt-4">
-    <div class="accommodation-info">
-        <h3 class="card-title text-center"><?php echo htmlspecialchars($accommodation->name); ?></h3>
-        <p class="card-description text-center"><?php echo htmlspecialchars($accommodation->description); ?></p>
-        <p class="text-center"><strong>Localização:</strong> <?php echo htmlspecialchars($accommodation->location); ?></p>
-        <p class="text-center"><strong>Preço por noite:</strong> R$ <?php echo number_format($accommodation->price_per_night, 2, ',', '.'); ?></p>
-        <p class="text-center"><strong>Quartos:</strong> <?php echo htmlspecialchars($accommodation->num_rooms); ?></p>
-        <p class="text-center"><strong>Banheiros:</strong> <?php echo htmlspecialchars($accommodation->num_bathrooms); ?></p>
-        <p class="text-center"><strong>Máximo de hóspedes:</strong> <?php echo htmlspecialchars($accommodation->max_guests); ?></p>
-        <div class="text-center">
-            <?php 
-            if (!empty($accommodation->category_names)) {
-                $categories = explode(',', $accommodation->category_names);
-                foreach ($categories as $category): ?>
-                    <span class="badge bg-info badge-small"><?php echo htmlspecialchars($category); ?></span>
-                <?php endforeach;
-            } else {
-                echo '<span class="badge bg-gradient-secondary badge-small">Sem categorias</span>';
-            }
-            ?>
+            <!-- Informações do Pagamento -->
+            <div class="payment-section">
+                <h5>Pagar com</h5>
+                <div class="btn-group w-100 mb-3" role="group">
+                    <button type="button" class="btn btn-secondary">Cartão de Crédito</button>
+                    <button type="button" class="btn btn-outline-secondary">PIX</button>
+                </div>
+
+                <form>
+                    <div class="mb-3">
+                        <label for="cardName" class="form-label">Nome no Cartão</label>
+                        <input type="text" class="form-control" id="cardName" placeholder="Nome como aparece no cartão">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cardNumber" class="form-label">Número do Cartão</label>
+                        <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9101 1121">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cardExpiry" class="form-label">Data de Expiração</label>
+                            <input type="text" class="form-control" id="cardExpiry" placeholder="MM/AA">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cardCVC" class="form-label">CVC</label>
+                            <input type="text" class="form-control" id="cardCVC" placeholder="CVC">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Reservar e Pagar</button>
+                </form>
+            </div>
+
+            <!-- Política de Cancelamento e Regras -->
+            <div class="policy-section">
+                <h6>Política de cancelamento:</h6>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                <h6>Regras básicas:</h6>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </div>
         </div>
-    </div>
 
-    <div class="reservation-card">
-        <h4 class="card-title text-center">Reserva</h4>
-
-        <form action="<?php echo base_url('accommodations/reservar'); ?>" method="POST">
-    <div class="form-group">
-        <label for="checkin_date">Data de Check-in</label>
-        <input class="form-control datepicker" id="checkin_date" name="checkin_date" placeholder="Selecione a data" type="text" required>
-    </div>
-
-    <div class="form-group">
-        <label for="checkout_date">Data de Check-out</label>
-        <input class="form-control datepicker" id="checkout_date" name="checkout_date" placeholder="Selecione a data" type="text" required>
-    </div>
-
-    <div class="form-group">
-        <label for="guests">Número de Hóspedes</label>
-        <input class="form-control" id="guests" name="guests" type="number" min="1" max="<?php echo htmlspecialchars($accommodation->max_guests); ?>" required>
-    </div>
-
-    <button type="submit" class="btn btn-primary btn-block">Reservar</button>
-</form>
-    </div>
-</div>
-            <?php else: ?>
-                <p>Acomodação não encontrada.</p>
-            <?php endif; ?>
+        <!-- Informações de Preço -->
+        <div class="col-md-5">
+            <div class="reservation-summary">
+                <h5>Informações de preço</h5>
+                <p>R$<?php echo htmlspecialchars(number_format($accommodation->price_per_night, 2, ',', '.')); ?>/noite</p>
+                <p>Taxa de limpeza: R$50</p>
+                <p>Taxa de serviço: R$30</p>
+                <p class="total-price">Total: R$<?php echo htmlspecialchars(number_format($reservation['total_price'], 2, ',', '.')); ?></p>
+                <button class="btn btn-secondary">Plano de parcelamento</button>
+            </div>
         </div>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.min.js"></script>
-
-
-<script src="<?php echo base_url('assets/js/plugins/flatpickr.min.js'); ?>"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        flatpickr('.datepicker', {
-            dateFormat: 'd/m/Y',
-            minDate: 'today',
-            locale: 'pt'
-        });
-    });
-</script>
