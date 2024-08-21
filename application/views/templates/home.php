@@ -155,7 +155,7 @@
                             </a>
                         </li>
                         <li class="nav-item px-3 d-flex align-items-center">
-                            <a href="javascript:;" class="nav-link text-body p-0">
+                            <a href="/admin" class="nav-link text-body p-0">
                                 <i class="fa fa-cog fixed-plugin-button-nav cursor-pointer" aria-hidden="true"></i>
                             </a>
                         </li>
@@ -232,6 +232,21 @@
                                 </li>
                             </ul>
                         </li>
+                        <?php if ($this->session->userdata('logado')): ?>
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="<?php echo base_url('auth/logout'); ?>" class="nav-link text-body font-weight-bold px-0">
+                                <i class="fa fa-sign-out-alt me-sm-1" aria-hidden="true"></i>
+                                <span class="d-sm-inline d-none">Logout</span>
+                            </a>
+                        </li>
+                        <?php else: ?>
+                        <li class="nav-item d-flex align-items-center">
+                            <a href="<?php echo base_url('auth/login'); ?>" class="nav-link text-body font-weight-bold px-0">
+                                <i class="fa fa-sign-in-alt me-sm-1" aria-hidden="true"></i>
+                                <span class="d-sm-inline d-none">Login</span>
+                            </a>
+                        </li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>

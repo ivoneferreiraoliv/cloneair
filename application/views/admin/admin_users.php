@@ -16,13 +16,14 @@
       </li>
 
       <li class="px-nav-item ">
-      <a href="/cloneair/admin/accommodations"><ion-icon name="bed-outline" role="img" class="md hydrated" aria-label="bed outline"></ion-icon> Acomodações</a>
+      <a href="<?php echo base_url('admin/accommodations'); ?>">
+        <ion-icon name="bed-outline" role="img" class="md hydrated" aria-label="bed outline"></ion-icon> Acomodações</a>
       </li>
       <li class="px-nav-item">
         <a href="#"><ion-icon name="people-outline" role="img" class="md hydrated" aria-label="people outline"></ion-icon> Usuários</a>
       </li>
       <li class="px-nav-item ">
-        <a href="#"><ion-icon name="calendar-outline" role="img" class="md hydrated" aria-label="calendar outline"></ion-icon> Reservas</a>
+        <a href="reservas"><ion-icon name="calendar-outline" role="img" class="md hydrated" aria-label="calendar outline"></ion-icon> Reservas</a>
       </li>
     </ul>
   </nav>
@@ -42,7 +43,7 @@
       </ul>
     </div><!-- /.navbar-collapse -->
   </nav>
-
+    
     <div class="px-content">
     <div class="page-header">
         <h1><span class="text-muted font-weight-light"><i class="page-header-icon ion-ios-keypad"></i>Usuários / </span>Gerenciar</h1>

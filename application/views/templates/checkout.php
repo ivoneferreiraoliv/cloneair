@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,8 +60,7 @@
                               <i class="fa fa-user me-sm-1" aria-hidden="true"></i>
                               <span class="d-sm-inline d-none">People</span> 
                           </a>
-                      </li>
-                        <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+                          <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
                                 <div class="sidenav-toggler-inner">
                                     <i class="sidenav-toggler-line"></i>
@@ -154,7 +154,12 @@
 
 
 		
-		<div class="container mt-5">
+        <?php
+// Recupera os dados da sessão
+$reservation = $this->session->userdata('reservation');
+?>
+
+<div class="container mt-5">
     <form id="backForm" action="<?php echo base_url('accommodations/detalhes/' . $reservation['accommodation_id']); ?>" method="POST" style="display: none;">
         <input type="hidden" name="price_per_night" value="<?php echo $reservation['price_per_night']; ?>">
         <input type="hidden" name="checkin_date" value="<?php echo $reservation['checkin_date']; ?>">
@@ -162,59 +167,12 @@
         <input type="hidden" name="guests" value="<?php echo $reservation['guests']; ?>">
     </form>
 
+    
     <!-- Botão Voltar -->
     <?php $previous_details_url = $this->session->userdata('previous_details_url'); ?>
-<a href="javascript:void(0);" onclick="window.location.href='<?php echo htmlspecialchars($previous_details_url); ?>';" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Voltar</a>
+    <a href="javascript:void(0);" onclick="window.location.href='<?php echo htmlspecialchars($previous_details_url); ?>';" class="btn btn-secondary mb-3" style="width: auto;"><i class="fas fa-arrow-left"></i> Voltar</a>
 
     <div class="row">
-        <!-- Detalhes da Reserva -->
-        <div class="col-md-7">
-            <div class="reservation-summary">
-                <h5>Sua reserva</h5>
-                <p>Datas: <strong><?php echo isset($reservation['checkin_date']) ? htmlspecialchars($reservation['checkin_date']) : 'N/A'; ?></strong> até <strong><?php echo isset($reservation['checkout_date']) ? htmlspecialchars($reservation['checkout_date']) : 'N/A'; ?></strong></p>
-                <p>Hóspedes: <strong><?php echo isset($guests) ? htmlspecialchars($guests) : 'N/A'; ?> Hóspedes</strong></p>
-            </div>
-
-            <!-- Informações do Pagamento -->
-            <div class="payment-section">
-                <h5>Pagar com</h5>
-                <div class="btn-group w-100 mb-3" role="group">
-                    <button type="button" class="btn btn-secondary">Cartão de Crédito</button>
-                    <button type="button" class="btn btn-outline-secondary">PIX</button>
-                </div>
-
-                <form>
-                    <div class="mb-3">
-                        <label for="cardName" class="form-label">Nome no Cartão</label>
-                        <input type="text" class="form-control" id="cardName" placeholder="Nome como aparece no cartão">
-                    </div>
-                    <div class="mb-3">
-                        <label for="cardNumber" class="form-label">Número do Cartão</label>
-                        <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9101 1121">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="cardExpiry" class="form-label">Data de Expiração</label>
-                            <input type="text" class="form-control" id="cardExpiry" placeholder="MM/AA">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="cardCVC" class="form-label">CVC</label>
-                            <input type="text" class="form-control" id="cardCVC" placeholder="CVC">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Reservar e Pagar</button>
-                </form>
-            </div>
-
-            <!-- Política de Cancelamento e Regras -->
-            <div class="policy-section">
-                <h6>Política de cancelamento:</h6>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <h6>Regras básicas:</h6>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            </div>
-        </div>
-
         <!-- Informações de Preço -->
         <div class="col-md-5">
             <div class="reservation-summary">
@@ -225,6 +183,117 @@
                 <p class="total-price">Total: R$<?php echo htmlspecialchars(number_format($reservation['total_price'], 2, ',', '.')); ?></p>
                 <button class="btn btn-secondary">Plano de parcelamento</button>
             </div>
+
+           <!-- Informações do Pagamento -->
+<div class="payment-section mt-4">
+    <h5>Pagar com</h5>
+    <div class="btn-group w-100 mb-3" role="group">
+        <button type="button" class="btn btn-secondary" onclick="selectPaymentMethod('credit_card')">Cartão de Crédito</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="selectPaymentMethod('pix')">PIX</button>
+    </div>
+
+    <form id="paymentForm">
+        <input type="hidden" name="payment_method" id="paymentMethod" value="credit_card">
+        
+        <!-- Campos de Cartão de Crédito -->
+        <div id="creditCardFields">
+            <div class="mb-3">
+                <label for="cardName" class="form-label">Nome no Cartão</label>
+                <input type="text" class="form-control" id="cardName" name="card_name" placeholder="Nome como aparece no cartão">
+            </div>
+            <div class="mb-3">
+                <label for="cardNumber" class="form-label">Número do Cartão</label>
+                <input type="text" class="form-control" id="cardNumber" name="card_number" placeholder="1234 5678 9101 1121">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cardExpiry" class="form-label">Data de Expiração</label>
+                    <input type="text" class="form-control" id="cardExpiry" name="card_expiry" placeholder="MM/AA">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cardCVC" class="form-label">CVC</label>
+                    <input type="text" class="form-control" id="cardCVC" name="card_cvc" placeholder="CVC">
+                </div>
+            </div>
+        </div>
+
+        <!-- Campos de PIX -->
+        <div id="pixFields" style="display: none;">
+            <p>Para pagar com PIX, escaneie o código QR abaixo:</p>
+            <img src="" alt="QR Code PIX">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Reservar e Pagar</button>
+    </form>
+</div>
+        </div>
+
+        <!-- Detalhes da Reserva -->
+        <div class="col-md-7">
+            <div class="reservation-summary">
+                <h5>Sua reserva</h5>
+                <p>Datas: <strong><?php echo isset($reservation['checkin_date']) ? htmlspecialchars($reservation['checkin_date']) : 'N/A'; ?></strong> até <strong><?php echo isset($reservation['checkout_date']) ? htmlspecialchars($reservation['checkout_date']) : 'N/A'; ?></strong></p>
+                <p>Hóspedes: <strong><?php echo isset($reservation['guests']) ? htmlspecialchars($reservation['guests']) : 'N/A'; ?> Hóspedes</strong></p>
+            </div>
+
+            <!-- Política de Cancelamento e Regras -->
+            <div class="policy-section mt-4">
+                <h6>Política de cancelamento:</h6>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                <h6>Regras básicas:</h6>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+function selectPaymentMethod(method) {
+    document.getElementById('paymentMethod').value = method;
+    if (method === 'credit_card') {
+        document.getElementById('creditCardFields').style.display = 'block';
+        document.getElementById('pixFields').style.display = 'none';
+    } else {
+        document.getElementById('creditCardFields').style.display = 'none';
+        document.getElementById('pixFields').style.display = 'block';
+    }
+}
+
+document.getElementById('paymentForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var formData = new FormData(this);
+
+    fetch('<?php echo base_url('accommodations/process_payment'); ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Pagamento realizado com sucesso!',
+                text: 'Sua reserva foi confirmada.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = '<?php echo base_url('minhasreservas'); ?>';
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro no pagamento',
+                text: data.message || 'Falha no processamento do pagamento. Tente novamente.',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro no pagamento',
+            text: 'Ocorreu um erro inesperado. Por favor, tente novamente.',
+            confirmButtonText: 'OK'
+        });
+    });
+});
+</script>

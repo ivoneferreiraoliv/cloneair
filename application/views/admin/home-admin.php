@@ -17,13 +17,14 @@
       </li>
 
       <li class="px-nav-item ">
-      <a href="admin/accommodations"><ion-icon name="bed-outline" role="img" class="md hydrated" aria-label="bed outline"></ion-icon> Acomodações</a>
+      <a href="<?php echo base_url('admin/accommodations'); ?>">
+        <ion-icon name="bed-outline" role="img" class="md hydrated" aria-label="bed outline"></ion-icon> Acomodações</a>
       </li>
       <li class="px-nav-item">
         <a href="admin/usuarios"><ion-icon name="people-outline" role="img" class="md hydrated" aria-label="people outline"></ion-icon> Usuários</a>
       </li>
       <li class="px-nav-item ">
-        <a href="#"><ion-icon name="calendar-outline" role="img" class="md hydrated" aria-label="calendar outline"></ion-icon> Reservas</a>
+        <a href="admin/reservas"><ion-icon name="calendar-outline" role="img" class="md hydrated" aria-label="calendar outline"></ion-icon> Reservas</a>
       </li>
     </ul>
   </nav>

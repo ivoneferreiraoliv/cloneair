@@ -62,15 +62,19 @@ $route['admin/accommodations/excluir'] = 'admin/delete_accommodation_ajax';
 $route['admin/usuarios'] = 'users/listar_admin';
 $route['admin/usuarios/adicionar'] = 'users/adicionar';
 $route['admin/usuarios/editar/(:num)'] = 'users/editar/$1';
+$route ['admin/reservas'] = 'reservations/index';
 
 $route['admin/usuarios/excluir'] = 'users/excluir';
 
 $route['admin/logout'] = 'admin/logout';
 //
 
+$route['login'] = 'auth/login';
+$route['registrar'] = 'auth/registrar';
 
 $route['accommodations/search'] = 'accommodations/search';
 $route['accommodations/reservar'] = 'accommodations/reservar';
+$route['accommodations/process_payment'] = 'accommodations/process_payment';
 $route['accommodations/detalhes/(:num)'] = 'accommodations/detalhes/$1';
 
 

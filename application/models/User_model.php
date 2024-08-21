@@ -20,12 +20,7 @@ class User_model extends CI_Model {
     }
 
     public function adicionar($data) {
-        $insert = $this->db->insert('users', $data);
-        if ($insert) {
-            return true; 
-        } else {
-            return false; 
-        }
+        return $this->db->insert('users', $data);
     }
 
     public function get_user_by_id($id) {
@@ -46,4 +41,9 @@ class User_model extends CI_Model {
         return $result; 
     }
 
+    public function get_user_by_email($email) {
+        $this->db->where('email', $email);
+        $query = $this->db->get('users');
+        return $query->row(); // Retorna uma única linha como objeto
+    }
 }

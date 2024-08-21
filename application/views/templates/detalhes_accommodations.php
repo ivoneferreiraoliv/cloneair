@@ -223,27 +223,45 @@
     </div>
 
     <div class="reservation-card">
-        <h4 class="card-title text-center">Reserva</h4>
+    <?php
+// Verifica se o formulário foi enviado
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Salva os dados do formulário na sessão
+    $this->session->set_userdata('reservation', [
+        'checkin_date' => $this->input->post('checkin_date'),
+        'checkout_date' => $this->input->post('checkout_date'),
+        'guests' => $this->input->post('guests'),
+        'price_per_night' => $accommodation->price_per_night, // Supondo que você tenha essa informação disponível
+        'accommodation_id' => $accommodation->id // Supondo que você tenha essa informação disponível
+    ]);
 
-        <form action="<?php echo base_url('accommodations/reservar'); ?>" method="POST">
-    <div class="form-group">
-        <label for="checkin_date">Data de Check-in</label>
-        <input class="form-control datepicker" id="checkin_date" name="checkin_date" placeholder="Selecione a data" type="text" required>
-    </div>
+    // Redireciona para a página de checkout
+    redirect('accommodations/reservar');
+}
+?>
 
-    <div class="form-group">
-        <label for="checkout_date">Data de Check-out</label>
-        <input class="form-control datepicker" id="checkout_date" name="checkout_date" placeholder="Selecione a data" type="text" required>
-    </div>
+<div class="reservation-card">
+    <h4 class="card-title text-center">Reserva</h4>
 
-    <div class="form-group">
-        <label for="guests">Número de Hóspedes</label>
-        <input class="form-control" id="guests" name="guests" type="number" min="1" max="<?php echo htmlspecialchars($accommodation->max_guests); ?>" required>
-    </div>
+    <form action="" method="POST">
+        <div class="form-group">
+            <label for="checkin_date">Data de Check-in</label>
+            <input class="form-control datepicker" id="checkin_date" name="checkin_date" placeholder="Selecione a data" type="text" required>
+        </div>
 
-    <button type="submit" class="btn btn-primary btn-block">Reservar</button>
-</form>
-    </div>
+        <div class="form-group">
+            <label for="checkout_date">Data de Check-out</label>
+            <input class="form-control datepicker" id="checkout_date" name="checkout_date" placeholder="Selecione a data" type="text" required>
+        </div>
+
+        <div class="form-group">
+            <label for="guests">Número de Hóspedes</label>
+            <input class="form-control" id="guests" name="guests" type="number" min="1" max="<?php echo htmlspecialchars($accommodation->max_guests); ?>" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Reservar</button>
+    </form>
+</div>
 </div>
             <?php else: ?>
                 <p>Acomodação não encontrada.</p>
@@ -260,10 +278,35 @@
 <script src="<?php echo base_url('assets/js/plugins/flatpickr.min.js'); ?>"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const checkinDate = document.getElementById('checkin_date');
+        const checkoutDate = document.getElementById('checkout_date');
+
+        // Inicializa o flatpickr para os campos de data
         flatpickr('.datepicker', {
             dateFormat: 'd/m/Y',
             minDate: 'today',
             locale: 'pt'
+        });
+
+        // Atualiza a data mínima do checkout quando a data de check-in é alterada
+        checkinDate.addEventListener('change', function() {
+            const checkinValue = checkinDate.value;
+            flatpickr(checkoutDate, {
+                dateFormat: 'd/m/Y',
+                minDate: checkinValue,
+                locale: 'pt'
+            });
+        });
+
+        // Valida a data de checkout
+        checkoutDate.addEventListener('change', function() {
+            const checkinValue = new Date(checkinDate.value.split('/').reverse().join('-'));
+            const checkoutValue = new Date(checkoutDate.value.split('/').reverse().join('-'));
+
+            if (checkoutValue <= checkinValue) {
+                alert('A data de check-out deve ser posterior à data de check-in.');
+                checkoutDate.value = '';
+            }
         });
     });
 </script>

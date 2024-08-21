@@ -11,11 +11,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Accommodations extends CI_Controller {
     public function __construct() {
         parent::__construct();
-        $this->load->model('Accommodation_model'); // Certifique-se de que o modelo está sendo carregado aqui
+        $this->load->model('Accommodation_model');
         $this->load->library('pagination');
         $this->load->library('session');
+        $this->load->model('Reservation_model');
+        
+        
     }
     
+    private function check_login() {
+        if (!$this->session->userdata('logado')) {
+            redirect('auth/login');
+        }
+    }   
+
 	public function search($page = 0) {
         $category = $this->input->get('category');
         $search_query = $this->input->get('query');
@@ -93,6 +102,8 @@ class Accommodations extends CI_Controller {
     }
 
     public function definir_reserva() {
+        $this->check_login();
+
         $checkin_date = $this->input->post('checkin_date');
         $checkout_date = $this->input->post('checkout_date');
         $guests = $this->input->post('guests');
@@ -163,5 +174,92 @@ class Accommodations extends CI_Controller {
         $this->load->view('templates/header');
         $this->load->view('templates/checkout', $data);
         $this->load->view('templates/footer');
+    }
+
+    public function process_payment() {
+        $this->load->library('form_validation');
+        
+        // Regras de validação
+        $this->form_validation->set_rules('payment_method', 'Payment Method', 'required');
+        
+        if ($this->input->post('payment_method') === 'credit_card') {
+            $this->form_validation->set_rules('card_name', 'Card Name', 'required');
+            $this->form_validation->set_rules('card_number', 'Card Number', 'required');
+            $this->form_validation->set_rules('card_expiry', 'Card Expiry', 'required');
+            $this->form_validation->set_rules('card_cvc', 'Card CVC', 'required');
+        }
+        
+        if ($this->form_validation->run() === FALSE) {
+            // Responder com erros de validação
+            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+            return;
+        }
+        
+        $payment_method = $this->input->post('payment_method');
+        $reservation = $this->session->userdata('reservation');
+        
+        if (!$reservation) {
+            echo json_encode(['status' => 'error', 'message' => 'Nenhuma informação de reserva encontrada na sessão.']);
+            return;
+        }
+        
+        // Obtenha o user_id da sessão
+        $user_id = $this->session->userdata('user_id');
+        
+        if (!$user_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Usuário não está logado.']);
+            return;
+        }
+    
+        // Verifique a disponibilidade das datas
+        $checkin_date = DateTime::createFromFormat('d/m/Y', $reservation['checkin_date'])->format('Y-m-d');
+        $checkout_date = DateTime::createFromFormat('d/m/Y', $reservation['checkout_date'])->format('Y-m-d');
+        
+        $is_available = $this->Reservation_model->is_date_available($reservation['accommodation_id'], $checkin_date, $checkout_date);
+        
+        if (!$is_available) {
+            echo json_encode(['status' => 'error', 'message' => 'As datas selecionadas já estão reservadas.']);
+            return;
+        }
+        
+        // Simulação de processamento de pagamento
+        if ($payment_method === 'credit_card') {
+            // Simulação de processamento de pagamento com cartão de crédito
+            $card_name = $this->input->post('card_name');
+            $card_number = $this->input->post('card_number');
+            $card_expiry = $this->input->post('card_expiry');
+            $card_cvc = $this->input->post('card_cvc');
+        
+            // Simulação de sucesso ou falha com 50/50
+            $payment_status = (rand(0, 1) === 1) ? 'success' : 'error';
+        } elseif ($payment_method === 'pix') {
+            // Simulação de processamento de pagamento com PIX
+            $payment_status = (rand(0, 1) === 1) ? 'success' : 'error';
+        } else {
+            $payment_status = 'error';
+        }
+        
+        // Salvar a reserva no banco de dados com status "pendente"
+        $reservation_data = [
+            'user_id' => $user_id,
+            'accommodation_id' => $reservation['accommodation_id'],
+            'checkin_date' => $checkin_date,
+            'checkout_date' => $checkout_date,
+            'guests' => $reservation['guests'],
+            'total_price' => $reservation['total_price'],
+            'status' => 'pendente', 
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $reservation_id = $this->Reservation_model->create_reservation($reservation_data);
+        
+        // Atualizar o status da reserva se o pagamento for bem-sucedido
+        if ($payment_status === 'success') {
+            $this->Reservation_model->update_reservation_status($reservation_id, 'confirmed');
+        }
+        
+        // Retornar resposta JSON
+        echo json_encode(['status' => $payment_status, 'message' => $payment_status === 'success' ? 'Reserva confirmada!' : 'Falha no pagamento. Tente novamente.']);
     }
 }
