@@ -8,7 +8,7 @@
 
   <nav class="px-nav px-nav-left" id="main-nav">
   <ul class="px-nav-content">
-      <<li class="px-nav-box p-a-3 b-b-1" id="demo-px-nav-box" style="margin-top: 60px;">
+      <li class="px-nav-box p-a-3 b-b-1" id="demo-px-nav-box" style="margin-top: 60px;">
         <div class="btn-group" style="margin-top: 4px;">
         <div class="font-size-16"><span class="font-weight-light">Bem vindo! </span></div>
         <a href="<?php echo base_url('admin/logout'); ?>" class="btn btn-xs btn-danger btn-outline"><i class="fa fa-power-off"></i> Logout</a>
@@ -78,8 +78,10 @@
                     <td><?php echo date('d/m/Y', strtotime($reservation->checkout_date)); ?></td>
                     <td class="reservation-status"><?php echo $reservation->status; ?></td>
                     <td>
-                        <button data-id="<?php echo $reservation->id; ?>" class="btn btn-xs btn-success btn-confirm">Confirmar</button>
-                        <button data-id="<?php echo $reservation->id; ?>" class="btn btn-xs btn-danger btn-reject">Recusar</button>
+                        <?php if ($reservation->status == 'pendente'): ?>
+                            <button data-id="<?php echo $reservation->id; ?>" class="btn btn-xs btn-success btn-confirm">Confirmar</button>
+                            <button data-id="<?php echo $reservation->id; ?>" class="btn btn-xs btn-danger btn-reject">Recusar</button>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -98,15 +100,15 @@
 $(document).ready(function() {
     $('.btn-confirm').click(function() {
         var reservationId = $(this).data('id');
-        updateReservationStatus(reservationId, 'confirmada');
+        updateReservationStatus(reservationId, 'confirmada', 'Reserva confirmada com sucesso!');
     });
 
     $('.btn-reject').click(function() {
         var reservationId = $(this).data('id');
-        updateReservationStatus(reservationId, 'cancelada');
+        updateReservationStatus(reservationId, 'cancelada', 'Reserva recusada com sucesso!');
     });
 
-    function updateReservationStatus(id, status) {
+    function updateReservationStatus(id, status, message) {
         $.ajax({
             url: '<?php echo base_url("reservations/update_status_ajax"); ?>',
             type: 'POST',
@@ -118,10 +120,11 @@ $(document).ready(function() {
                 var result = JSON.parse(response);
                 if (result.success) {
                     $('#reservation-' + id + ' .reservation-status').text(status);
+                    $('#reservation-' + id + ' .btn-confirm, #reservation-' + id + ' .btn-reject').hide();
                     Swal.fire({
                         icon: 'success',
                         title: 'Sucesso',
-                        text: result.message,
+                        text: message,
                         confirmButtonText: 'OK'
                     });
                 } else {

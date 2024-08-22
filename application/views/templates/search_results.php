@@ -1,3 +1,4 @@
+
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -47,13 +48,14 @@ body {
                       <input type="text" name="query" class="form-control" placeholder="Digite aqui..." value="<?php echo isset($search_query) ? $search_query : ''; ?>">
                   </form>
               </div>
-                    <ul class="navbar-nav justify-content-end">
-                      <li class="nav-item d-flex align-items-center">
-                          <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
-                              <i class="fa fa-user me-sm-1" aria-hidden="true"></i>
-                              <span class="d-sm-inline d-none">People</span> 
-                          </a>
-                      </li>
+              <ul class="navbar-nav justify-content-end">
+                    <li class="nav-item d-flex align-items-center">
+                        <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
+                            <i class="fa fa-user me-sm-1" aria-hidden="true"></i>
+                            <span class="d-sm-inline d-none"><?php echo htmlspecialchars($username); ?></span>
+                        </a>
+                    </li>
+                </ul>
                         <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
                                 <div class="sidenav-toggler-inner">
@@ -159,4 +161,29 @@ body {
 </div>
     
     
-</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Script para marcar notificações como lidas
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const notificationId = this.getAttribute('data-notification-id');
+                if (notificationId) {
+                    markNotificationAsRead(notificationId);
+                }
+            });
+        });
+    });
+
+    function markNotificationAsRead(notificationId) {
+        fetch('<?php echo base_url("notifications/mark_as_read/"); ?>' + notificationId, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Notificação marcada como lida.');
+            }
+        })
+        .catch(error => console.error('Erro ao marcar notificação como lida:', error));
+    }
+</script>

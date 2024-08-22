@@ -177,7 +177,6 @@ public function create_accommodation() {
         echo json_encode(['status' => 'error', 'message' => 'Erro ao adicionar acomodação.']);
     }
 }
-
 private function set_upload_options() {   
     $config = array();
     $config['upload_path'] = './uploads/';

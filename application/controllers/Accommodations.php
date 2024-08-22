@@ -26,8 +26,17 @@ class Accommodations extends CI_Controller {
     }   
 
 	public function search($page = 0) {
+        $user_id = $this->session->userdata('user_id');
+        if ($user_id) {
+            $data['notifications'] = $this->Notification_model->get_user_notifications($user_id);
+            $data['unread_count'] = $this->Notification_model->count_unread_notifications($user_id);
+        }
+        
         $category = $this->input->get('category');
         $search_query = $this->input->get('query');
+
+        $data['username'] = $this->session->userdata('username');
+
 
         // Configuração da paginação
         $config = array();
@@ -69,12 +78,18 @@ class Accommodations extends CI_Controller {
         $data['total_accommodations'] = $config['total_rows'];
         $data['pagination'] = $this->pagination->create_links();
 
+        
         $this->load->view('templates/header.php'); 
         $this->load->view('templates/search_results.php', $data);
-        $this->load->view('templates/footer.php');
+        $this->load->view('templates/footer.php',$data);
     }
 
     public function detalhes($id = null) {
+        $user_id = $this->session->userdata('user_id');
+        if ($user_id) {
+            $data['notifications'] = $this->Notification_model->get_user_notifications($user_id);
+            $data['unread_count'] = $this->Notification_model->count_unread_notifications($user_id);
+        }
         if ($id === null) {
             show_404();
         }
@@ -95,44 +110,60 @@ class Accommodations extends CI_Controller {
         $reservation = $this->session->userdata('reservation');
         $data['accommodation'] = $accommodation;
         $data['reservation'] = $reservation;
+        $data['username'] = $this->session->userdata('username');
 
-        $this->load->view('templates/header');
+
+        $this->load->view('templates/header',$data);
         $this->load->view('templates/detalhes_accommodations', $data);
-        $this->load->view('templates/footer');
+        $this->load->view('templates/footer',$data);
     }
 
-    public function definir_reserva() {
+    public function definir_reserva($id = null) {
         $this->check_login();
-
+    
+        // Verifica se o ID da acomodação foi passado na URL
+        if ($id === null) {
+            show_404();
+        }
+    
+        // Recupera os dados do formulário
         $checkin_date = $this->input->post('checkin_date');
         $checkout_date = $this->input->post('checkout_date');
         $guests = $this->input->post('guests');
-
-        $accommodation_id = $this->session->userdata('selected_accommodation_id');
-
-        if (!$accommodation_id) {
-            show_error('ID da acomodação não encontrado na sessão.');
+    
+        // Verifica se os dados do formulário foram enviados
+        if (!$checkin_date || !$checkout_date || !$guests) {
+            show_error('Todos os campos do formulário são obrigatórios.');
         }
-
-        $accommodation = $this->Accommodation_model->get_accommodation_by_id($accommodation_id);
-
+    
+        // Recupera a acomodação pelo ID
+        $accommodation = $this->Accommodation_model->get_accommodation_by_id($id);
+    
         if (!$accommodation) {
             show_404();
         }
-
+    
+        // Armazena os dados na sessão
         $this->session->set_userdata('reservation', [
-            'accommodation_id' => $accommodation_id,
-            'price_per_night' => $accommodation->price_per_night,
             'checkin_date' => $checkin_date,
             'checkout_date' => $checkout_date,
             'guests' => $guests,
+            'accommodation_id' => $id
         ]);
-
+    
+        // Redireciona para a página de reserva
         redirect('accommodations/reservar');
     }
 
     public function reservar() {
+        $user_id = $this->session->userdata('user_id');
+        if ($user_id) {
+            $data['notifications'] = $this->Notification_model->get_user_notifications($user_id);
+            $data['unread_count'] = $this->Notification_model->count_unread_notifications($user_id);
+        }
         $reservation = $this->session->userdata('reservation');
+        $data['username'] = $this->session->userdata('username');
+
 
         if (!$reservation) {
             redirect('accommodations');
@@ -197,6 +228,8 @@ class Accommodations extends CI_Controller {
         
         $payment_method = $this->input->post('payment_method');
         $reservation = $this->session->userdata('reservation');
+        $data['username'] = $this->session->userdata('username');
+
         
         if (!$reservation) {
             echo json_encode(['status' => 'error', 'message' => 'Nenhuma informação de reserva encontrada na sessão.']);

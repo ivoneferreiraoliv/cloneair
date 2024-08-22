@@ -35,9 +35,12 @@ class Auth extends CI_Controller {
                 $dataSession = array(
                     'user_id' => $userlogado->id,
                     'userlogado' => $userlogado,
+                    'username' =>$userlogado->username,
                     'logado' => TRUE
                 );
+                
                 $this->session->set_userdata($dataSession);
+                
                 redirect('home'); // Redireciona para a página inicial após o login bem-sucedido
             } else {
                 $this->session->set_flashdata('error', 'E-mail ou senha inválidos.');

@@ -73,6 +73,7 @@ $route['login'] = 'auth/login';
 $route['registrar'] = 'auth/registrar';
 
 $route['accommodations/search'] = 'accommodations/search';
+$route['accommodations/definir_reserva/(:num)'] = 'accommodations/definir_reserva/$1';
 $route['accommodations/reservar'] = 'accommodations/reservar';
 $route['accommodations/process_payment'] = 'accommodations/process_payment';
 $route['accommodations/detalhes/(:num)'] = 'accommodations/detalhes/$1';

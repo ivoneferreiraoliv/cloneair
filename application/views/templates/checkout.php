@@ -58,7 +58,7 @@
                       <li class="nav-item d-flex align-items-center">
                           <a href="javascript:;" class="nav-link text-body font-weight-bold px-0">
                               <i class="fa fa-user me-sm-1" aria-hidden="true"></i>
-                              <span class="d-sm-inline d-none">People</span> 
+                              <span class="d-sm-inline d-none"><?php echo htmlspecialchars($username); ?></span> 
                           </a>
                           <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
                             <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
@@ -248,52 +248,75 @@ $reservation = $this->session->userdata('reservation');
 </div>
 
 <script>
-function selectPaymentMethod(method) {
-    document.getElementById('paymentMethod').value = method;
-    if (method === 'credit_card') {
-        document.getElementById('creditCardFields').style.display = 'block';
-        document.getElementById('pixFields').style.display = 'none';
-    } else {
-        document.getElementById('creditCardFields').style.display = 'none';
-        document.getElementById('pixFields').style.display = 'block';
-    }
-}
-
-document.getElementById('paymentForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    var formData = new FormData(this);
-
-    fetch('<?php echo base_url('accommodations/process_payment'); ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Pagamento realizado com sucesso!',
-                text: 'Sua reserva foi confirmada.',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = '<?php echo base_url('minhasreservas'); ?>';
-            });
+    function selectPaymentMethod(method) {
+        document.getElementById('paymentMethod').value = method;
+        if (method === 'credit_card') {
+            document.getElementById('creditCardFields').style.display = 'block';
+            document.getElementById('pixFields').style.display = 'none';
         } else {
+            document.getElementById('creditCardFields').style.display = 'none';
+            document.getElementById('pixFields').style.display = 'block';
+        }
+    }
+
+    document.getElementById('paymentForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+
+        fetch('<?php echo base_url('accommodations/process_payment'); ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pagamento realizado com sucesso!',
+                    text: 'Sua reserva foi confirmada.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '<?php echo base_url('minhasreservas'); ?>';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro no pagamento',
+                    text: data.message || 'Falha no processamento do pagamento. Tente novamente.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
             Swal.fire({
                 icon: 'error',
                 title: 'Erro no pagamento',
-                text: data.message || 'Falha no processamento do pagamento. Tente novamente.',
+                text: 'Ocorreu um erro inesperado. Por favor, tente novamente.',
                 confirmButtonText: 'OK'
             });
-        }
-    })
-    .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Erro no pagamento',
-            text: 'Ocorreu um erro inesperado. Por favor, tente novamente.',
-            confirmButtonText: 'OK'
         });
     });
-});
+
+    // Script para marcar notificações como lidas
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const notificationId = this.getAttribute('data-notification-id');
+            if (notificationId) {
+                markNotificationAsRead(notificationId);
+            }
+        });
+    });
+
+    function markNotificationAsRead(notificationId) {
+        fetch('<?php echo base_url("notifications/mark_as_read/"); ?>' + notificationId, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Notificação marcada como lida.');
+            }
+        })
+        .catch(error => console.error('Erro ao marcar notificação como lida:', error));
+    }
 </script>
